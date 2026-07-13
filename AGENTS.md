@@ -24,8 +24,11 @@ src/connector-ui.js             JSX source for the Connectors setup card. Compil
                                 wp-scripts (see webpack.config.js / babel.config.js) into
                                 build/, which is what gets enqueued.
 build/                          Compiled script module + generated .asset.php (committed).
-assets/images/logo.svg          Generic provider logo (fallback).
-assets/images/providers/        Brand icons for auto-detected backends (Ollama/vLLM/LM Studio).
+assets/images/logo.svg          Generic provider logo (fallback), used at runtime by the plugin.
+assets/images/providers/        Brand icons for auto-detected backends (Ollama/vLLM/LM Studio),
+                                used at runtime by the plugin.
+assets/wordpress-org/           wp.org directory listing assets (icon, banner, screenshots) —
+                                not shipped in the plugin zip, see .distignore.
 blueprint.json                  WordPress Playground blueprint (linked from README.md).
 readme.txt                      wp.org plugin directory readme.
 ```

@@ -17,6 +17,7 @@ package-lock.json
 phpcs.xml.dist
 AGENTS.md
 README.md
+assets/wordpress-org
 *.zip
 babel.config.js
 webpack.config.js

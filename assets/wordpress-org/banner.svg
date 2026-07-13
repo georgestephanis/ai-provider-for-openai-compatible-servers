@@ -1,0 +1,19 @@
+<svg width="772" height="250" viewBox="0 0 772 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="772" height="250" fill="url(#banner_grad)" />
+  <g transform="translate(64, 65)">
+    <path d="M28 0H92C98.6 0 104 5.4 104 12V108C104 114.6 98.6 120 92 120H28C21.4 120 16 114.6 16 108V12C16 5.4 21.4 0 28 0Z" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linejoin="round" />
+    <rect x="37" y="37" width="46" height="46" rx="7" fill="white" fill-opacity="0.95" />
+    <path d="M60 -21V0" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linecap="round" />
+    <path d="M60 120V141" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linecap="round" />
+    <path d="M-21 60H0" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linecap="round" />
+    <path d="M120 60H141" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linecap="round" />
+  </g>
+  <text x="240" y="120" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="30" font-weight="700" fill="#ffffff">OpenAI Compatible Servers</text>
+  <text x="240" y="150" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" fill-opacity="0.85">Ollama &#183; vLLM &#183; LM Studio &#183; llama.cpp &#183; LocalAI</text>
+  <defs>
+    <linearGradient id="banner_grad" x1="0" y1="0" x2="772" y2="250" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F46E5" />
+      <stop offset="1" stop-color="#06B6D4" />
+    </linearGradient>
+  </defs>
+</svg>
