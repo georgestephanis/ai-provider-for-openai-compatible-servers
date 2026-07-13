@@ -402,6 +402,12 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
     $api_key = isset($params['api_key']) ? sanitize_text_field($params['api_key']) : '';
     $custom_headers = isset($params['headers']) ? $params['headers'] : array();
 
+    // Core masks connector API keys in REST settings responses ("••••fj39"), so the UI
+    // may echo the mask back rather than the real key. Substitute the stored key.
+    if (preg_match('/^\x{2022}/u', $api_key)) {
+        $api_key = (string) get_option('connectors_ai_openai_compatible_servers_api_key', '');
+    }
+
     if (empty($base_url)) {
         return new \WP_REST_Response(array(
             'success' => false,

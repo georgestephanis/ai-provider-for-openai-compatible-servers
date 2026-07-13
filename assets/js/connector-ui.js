@@ -465,6 +465,9 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 	const handleSave = async () => {
 		setIsBusy( true );
 		try {
+			// Core masks connector API keys in REST settings responses ("••••fj39"),
+			// so an untouched field holds the mask, not the key. Never save it back.
+			const isMaskedKey = tempApiKey.trim().startsWith( '•' );
 			const apiKeyToSave = tempApiKey.trim() || 'local';
 			const baseUrlToSave =
 				tempBaseUrl.trim() || 'http://localhost:11434/v1';
@@ -489,7 +492,9 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 				'root',
 				'site',
 				{
-					[ apiKeySettingName ]: apiKeyToSave,
+					...( isMaskedKey
+						? {}
+						: { [ apiKeySettingName ]: apiKeyToSave } ),
 					[ baseUrlSettingName ]: baseUrlToSave,
 					[ modelModeSettingName ]: modelModeToSave,
 					[ modelsSettingName ]: modelsToSave,
