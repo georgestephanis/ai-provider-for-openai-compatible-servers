@@ -634,15 +634,6 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 					className: 'connector-settings',
 					style: { marginTop: '16px' },
 				},
-				el(
-					'style',
-					null,
-					`
-                #connectors_openai_compatible_servers_api_key_input {
-                    -webkit-text-security: disc !important;
-                }
-            `
-				),
 				el( TextControl, {
 					__next40pxDefaultSize: true,
 					label: __(
@@ -716,7 +707,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 							__next40pxDefaultSize: true,
 							variant: 'secondary',
 							onClick: handleTestCredentials,
-							disabled: isBusy || isTesting,
+							disabled: isBusy || isTesting || ! hasInitialized,
 							isBusy: isTesting,
 							style: { marginBottom: '8px' },
 						},
@@ -1003,7 +994,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 						{
 							__next40pxDefaultSize: true,
 							variant: 'primary',
-							disabled: isBusy,
+							disabled: isBusy || ! hasInitialized,
 							onClick: handleSave,
 						},
 						__(
