@@ -185,38 +185,42 @@ function OpenAiCompatibleServersConnector({ name, description, logo, plugin }) {
         }
 
         let active = true;
-        setIsFetchingModels(true);
 
-        window.wp.apiFetch({
-            path: '/openai-compatible-servers/v1/test-connection',
-            method: 'POST',
-            data: {
-                base_url: tempBaseUrl,
-                api_key: tempApiKey,
-                headers: tempHeaders
-            }
-        })
-        .then(data => {
-            if (!active) return;
-            if (data.success && Array.isArray(data.data)) {
-                setAvailableModels(data.data);
-            } else {
+        const timeoutId = setTimeout(() => {
+            setIsFetchingModels(true);
+
+            window.wp.apiFetch({
+                path: '/openai-compatible-servers/v1/test-connection',
+                method: 'POST',
+                data: {
+                    base_url: tempBaseUrl,
+                    api_key: tempApiKey,
+                    headers: tempHeaders
+                }
+            })
+            .then(data => {
+                if (!active) return;
+                if (data.success && Array.isArray(data.data)) {
+                    setAvailableModels(data.data);
+                } else {
+                    setAvailableModels([]);
+                }
+            })
+            .catch(err => {
+                if (!active) return;
+                console.warn('Failed to autodetect models:', err);
                 setAvailableModels([]);
-            }
-        })
-        .catch(err => {
-            if (!active) return;
-            console.warn('Failed to autodetect models:', err);
-            setAvailableModels([]);
-        })
-        .finally(() => {
-            if (active) {
-                setIsFetchingModels(false);
-            }
-        });
+            })
+            .finally(() => {
+                if (active) {
+                    setIsFetchingModels(false);
+                }
+            });
+        }, 500);
 
         return () => {
             active = false;
+            clearTimeout(timeoutId);
         };
     }, [tempBaseUrl, tempApiKey]);
 
@@ -286,8 +290,6 @@ function OpenAiCompatibleServersConnector({ name, description, logo, plugin }) {
     const { createSuccessNotice, createErrorNotice } = useDispatch('core/notices');
 
     const handleTestCredentials = async () => {
-        const apiKeyInput = document.getElementById('connectors_openai_compatible_servers_api_key_input');
-        const apiKeyToUse = apiKeyInput ? apiKeyInput.value : tempApiKey;
         setIsTesting(true);
         setTestResult(null);
 
@@ -297,7 +299,7 @@ function OpenAiCompatibleServersConnector({ name, description, logo, plugin }) {
                 method: 'POST',
                 data: {
                     base_url: tempBaseUrl,
-                    api_key: apiKeyToUse,
+                    api_key: tempApiKey,
                     headers: tempHeaders
                 }
             });
@@ -355,8 +357,7 @@ function OpenAiCompatibleServersConnector({ name, description, logo, plugin }) {
     const handleSave = async () => {
         setIsBusy(true);
         try {
-            const apiKeyInput = document.getElementById('connectors_openai_compatible_servers_api_key_input');
-            const apiKeyToSave = (apiKeyInput ? apiKeyInput.value.trim() : tempApiKey.trim()) || 'local';
+            const apiKeyToSave = tempApiKey.trim() || 'local';
             const baseUrlToSave = tempBaseUrl.trim() || 'http://localhost:11434/v1';
             const modelModeToSave = tempModelMode || 'autodetect';
             const customList = tempExtraManualModels.split(',')
