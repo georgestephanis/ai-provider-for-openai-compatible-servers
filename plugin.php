@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: AI Provider for OpenAI Compatible Servers
- * Plugin URI: https://github.com/WordPress/ai-provider-for-openai-compatible-servers
+ * Plugin URI: https://github.com/georgestephanis/ai-provider-for-openai-compatible-servers
  * Description: Clean, lean provider to run local OpenAI-compatible servers (LM Studio, Ollama, vLLM, etc.) with the WordPress AI Client.
  * Requires at least: 6.9
  * Requires PHP: 7.4
