@@ -269,24 +269,34 @@ function flush_models_cache(): void
         // Fail silently.
     }
 }
-$connector_option_names = array(
-    'connectors_ai_openai_compatible_servers_base_url',
-    'connectors_ai_openai_compatible_servers_api_key',
-    'connectors_ai_openai_compatible_servers_model_mode',
-    'connectors_ai_openai_compatible_servers_models',
-    'connectors_ai_openai_compatible_servers_context_length',
-    'connectors_ai_openai_compatible_servers_disable_thinking',
-    'connectors_ai_openai_compatible_servers_headers',
-    'connectors_ai_openai_compatible_servers_supports_images',
-    'connectors_ai_openai_compatible_servers_enable_r1_format',
-);
-foreach ($connector_option_names as $connector_option_name) {
-    // `update_option_{option}` only fires on subsequent saves; `add_option_{option}` covers
-    // the option's first-ever save, which otherwise leaves a stale (or empty) models cache.
-    add_action('update_option_' . $connector_option_name, __NAMESPACE__ . '\\flush_models_cache');
-    add_action('add_option_' . $connector_option_name, __NAMESPACE__ . '\\flush_models_cache');
+/**
+ * Hooks the models-cache flush to every connector option save.
+ *
+ * @since 1.0.0
+ *
+ * @return void
+ */
+function register_cache_flush_hooks(): void
+{
+    $option_names = array(
+        'connectors_ai_openai_compatible_servers_base_url',
+        'connectors_ai_openai_compatible_servers_api_key',
+        'connectors_ai_openai_compatible_servers_model_mode',
+        'connectors_ai_openai_compatible_servers_models',
+        'connectors_ai_openai_compatible_servers_context_length',
+        'connectors_ai_openai_compatible_servers_disable_thinking',
+        'connectors_ai_openai_compatible_servers_headers',
+        'connectors_ai_openai_compatible_servers_supports_images',
+        'connectors_ai_openai_compatible_servers_enable_r1_format',
+    );
+    foreach ($option_names as $option_name) {
+        // `update_option_{option}` only fires on subsequent saves; `add_option_{option}` covers
+        // the option's first-ever save, which otherwise leaves a stale (or empty) models cache.
+        add_action('update_option_' . $option_name, __NAMESPACE__ . '\\flush_models_cache');
+        add_action('add_option_' . $option_name, __NAMESPACE__ . '\\flush_models_cache');
+    }
 }
-unset($connector_option_names, $connector_option_name);
+register_cache_flush_hooks();
 
 /**
  * Checks whether a request URL targets the same scheme+host+port as a configured base URL.

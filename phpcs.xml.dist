@@ -16,10 +16,11 @@
     <!-- Base formatting: PSR-12, as used by the WordPress AI Client SDK. -->
     <rule ref="PSR12"/>
 
-    <!-- The plugin bootstrap and autoloader legitimately mix declarations and side effects. -->
+    <!-- The plugin bootstrap and autoloader legitimately mix declarations and side
+         effects, and the class files carry ABSPATH direct-access guards. -->
     <rule ref="PSR1.Files.SideEffects">
         <exclude-pattern>plugin\.php$</exclude-pattern>
-        <exclude-pattern>includes/autoload\.php$</exclude-pattern>
+        <exclude-pattern>includes/*</exclude-pattern>
     </rule>
 
     <!-- WordPress-specific correctness and security sniffs. -->

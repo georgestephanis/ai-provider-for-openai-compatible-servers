@@ -12,6 +12,10 @@ declare(strict_types=1);
 
 namespace WordPress\OpenAiCompatibleServersProvider\Models;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCompatibleTextGenerationModel;

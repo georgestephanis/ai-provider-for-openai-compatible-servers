@@ -12,7 +12,10 @@ declare(strict_types=1);
 
 namespace WordPress\OpenAiCompatibleServersProvider\Provider;
 
-use WordPress\AiClient\AiClient;
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 use WordPress\AiClient\Common\Exception\RuntimeException;
 use WordPress\AiClient\Providers\ApiBasedImplementation\AbstractApiProvider;
 use WordPress\AiClient\Providers\ApiBasedImplementation\ListModelsApiBasedProviderAvailability;

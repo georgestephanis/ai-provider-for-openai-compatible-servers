@@ -13,18 +13,21 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
     return;
 }
 
-$connector_option_names = array(
-    'connectors_ai_openai_compatible_servers_api_key',
-    'connectors_ai_openai_compatible_servers_base_url',
-    'connectors_ai_openai_compatible_servers_model_mode',
-    'connectors_ai_openai_compatible_servers_models',
-    'connectors_ai_openai_compatible_servers_context_length',
-    'connectors_ai_openai_compatible_servers_disable_thinking',
-    'connectors_ai_openai_compatible_servers_headers',
-    'connectors_ai_openai_compatible_servers_supports_images',
-    'connectors_ai_openai_compatible_servers_enable_r1_format',
-);
+// Closure keeps the loop variables out of the global scope.
+(static function (): void {
+    $option_names = array(
+        'connectors_ai_openai_compatible_servers_api_key',
+        'connectors_ai_openai_compatible_servers_base_url',
+        'connectors_ai_openai_compatible_servers_model_mode',
+        'connectors_ai_openai_compatible_servers_models',
+        'connectors_ai_openai_compatible_servers_context_length',
+        'connectors_ai_openai_compatible_servers_disable_thinking',
+        'connectors_ai_openai_compatible_servers_headers',
+        'connectors_ai_openai_compatible_servers_supports_images',
+        'connectors_ai_openai_compatible_servers_enable_r1_format',
+    );
 
-foreach ($connector_option_names as $connector_option_name) {
-    delete_option($connector_option_name);
-}
+    foreach ($option_names as $option_name) {
+        delete_option($option_name);
+    }
+})();
