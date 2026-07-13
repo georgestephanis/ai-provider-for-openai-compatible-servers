@@ -42,22 +42,23 @@ class OpenAiCompatibleServersTextGenerationModel extends AbstractOpenAiCompatibl
         }
 
         if ('chat/completions' === $path && is_array($data)) {
-            // Apply Context Length overrides (num_ctx for Ollama, max_tokens for OpenAI standard).
+            // Context Length configures the model's context window, not the output length,
+            // so it must not be sent as `max_tokens` (which caps output tokens and would make
+            // strict servers reject the request). `num_ctx` is passed through best-effort for
+            // servers that read it directly from the request body; it's a no-op elsewhere.
             $context_length = (int) get_option('connectors_ai_openai_compatible_servers_context_length', 0);
-            if ($context_length > 0) {
-                if (!isset($data['num_ctx'])) {
-                    $data['num_ctx'] = $context_length;
-                }
-                if (!isset($data['max_tokens'])) {
-                    $data['max_tokens'] = $context_length;
-                }
+            if ($context_length > 0 && !isset($data['num_ctx'])) {
+                $data['num_ctx'] = $context_length;
             }
 
-            // Apply Disable Thinking overrides (thinking, max_thinking_tokens, reasoning_effort).
+            // Only send the two broadly-recognized thinking-control conventions (Qwen/vLLM's
+            // `thinking` flag and OpenAI's `reasoning_effort`). `max_thinking_tokens` is dropped:
+            // it's the least standard of the three and the most likely to trip strict servers'
+            // "unknown field" validation, without adding anything `thinking: false` doesn't
+            // already convey.
             $disable_thinking = (bool) get_option('connectors_ai_openai_compatible_servers_disable_thinking', false);
             if ($disable_thinking) {
                 $data['thinking'] = false;
-                $data['max_thinking_tokens'] = 0;
                 $data['reasoning_effort'] = 'low';
             }
         }
