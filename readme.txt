@@ -1,5 +1,5 @@
 === AI Provider for OpenAI Compatible Servers ===
-Contributors: wordpressdotorg
+Contributors: georgestephanis
 Tags: ai, ollama, openai, llm, local ai
 Requires at least: 6.9
 Tested up to: 6.9
