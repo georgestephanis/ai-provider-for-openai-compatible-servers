@@ -288,7 +288,6 @@ function OpenAiCompatibleServersConnector({ name, description, logo, plugin }) {
     const handleTestCredentials = async () => {
         const apiKeyInput = document.getElementById('connectors_openai_compatible_servers_api_key_input');
         const apiKeyToUse = apiKeyInput ? apiKeyInput.value : tempApiKey;
-        console.log('[AI Connector] Testing connection. API Key value:', apiKeyToUse);
         setIsTesting(true);
         setTestResult(null);
 
