@@ -56,6 +56,11 @@ Yes. Enter any base URL reachable from your WordPress host. The plugin allows re
 
 No. Requests go only to the server base URL you configure.
 
+== Screenshots ==
+
+1. The OpenAI Compatible connector's setup card on the Connectors settings screen — base URL, API key, and autodetect/manual model selection.
+2. A successful connection test with manually specified models, detected models to enable, and the advanced settings (context length, thinking-block toggle, image support, R1 message format, custom headers).
+
 == Credits ==
 
 The Ollama, vLLM, and LM Studio brand icons shown when a server is detected are from
