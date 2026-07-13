@@ -6,8 +6,8 @@
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Version: 1.0.0
- * Author: Antigravity
- * Author URI: https://make.wordpress.org/ai/
+ * Author: George Stephanis
+ * Author URI: https://georgestephanis.wordpress.com
  * License: GPL-2.0-or-later
  * License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
  * Text Domain: ai-provider-for-openai-compatible-servers
@@ -232,6 +232,37 @@ foreach ($connector_option_names as $connector_option_name) {
 unset($connector_option_names, $connector_option_name);
 
 /**
+ * Checks whether a request URL targets the same scheme+host+port as a configured base URL.
+ *
+ * Used instead of a raw string-prefix match, which would let e.g. a base URL of
+ * `http://host` also match `http://host.evil.com`.
+ *
+ * @since 1.0.0
+ *
+ * @param string $url      Request URL being checked.
+ * @param string $base_url Configured base URL to match against.
+ * @return bool Whether the URL's origin matches the base URL's origin.
+ */
+function url_matches_base_url_origin(string $url, string $base_url): bool
+{
+    $url_parts = wp_parse_url($url);
+    $base_parts = wp_parse_url($base_url);
+
+    if (!$url_parts || !$base_parts || empty($url_parts['host']) || empty($base_parts['host'])) {
+        return false;
+    }
+
+    $url_scheme = strtolower($url_parts['scheme'] ?? '');
+    $base_scheme = strtolower($base_parts['scheme'] ?? '');
+    $url_port = $url_parts['port'] ?? ('https' === $url_scheme ? 443 : 80);
+    $base_port = $base_parts['port'] ?? ('https' === $base_scheme ? 443 : 80);
+
+    return $url_scheme === $base_scheme
+        && strtolower($url_parts['host']) === strtolower($base_parts['host'])
+        && $url_port === $base_port;
+}
+
+/**
  * Filter HTTP request arguments to allow local server connections.
  *
  * @since 1.0.0
@@ -243,7 +274,7 @@ unset($connector_option_names, $connector_option_name);
 function allow_local_requests_for_our_connector(array $args, string $url): array
 {
     $base_url = get_option('connectors_ai_openai_compatible_servers_base_url');
-    if ($base_url && strpos($url, rtrim($base_url, '/')) === 0) {
+    if ($base_url && url_matches_base_url_origin($url, $base_url)) {
         $args['reject_unsafe_urls'] = false;
     }
     return $args;
@@ -274,6 +305,32 @@ function register_rest_routes(): void
 add_action('rest_api_init', __NAMESPACE__ . '\\register_rest_routes');
 
 /**
+ * Checks whether a string is a syntactically valid HTTP header field name.
+ *
+ * @since 1.0.0
+ *
+ * @param string $name Header field name.
+ * @return bool Whether the name is a valid HTTP token.
+ */
+function is_valid_http_header_name(string $name): bool
+{
+    return (bool) preg_match('/^[!#$%&\'*+\-.^_`|~0-9A-Za-z]+$/', $name);
+}
+
+/**
+ * Checks whether a string is safe to use as an HTTP header field value.
+ *
+ * @since 1.0.0
+ *
+ * @param string $value Header field value.
+ * @return bool Whether the value contains no CR/LF characters.
+ */
+function is_valid_http_header_value(string $value): bool
+{
+    return false === strpos($value, "\r") && false === strpos($value, "\n");
+}
+
+/**
  * Handle connection test REST API request.
  *
  * @since 1.0.0
@@ -289,7 +346,15 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
     $custom_headers = isset($params['headers']) ? $params['headers'] : array();
 
     if (empty($base_url)) {
-        return new \WP_REST_Response(array('success' => false, 'message' => __('Base URL is required.', 'ai-provider-for-openai-compatible-servers')), 400);
+        return new \WP_REST_Response(array('success' => false, 'message' => __('Base URL is required.', 'ai-provider-for-openai-compatible-servers')), 200);
+    }
+
+    $scheme = strtolower((string) wp_parse_url($base_url, PHP_URL_SCHEME));
+    if (!in_array($scheme, array('http', 'https'), true)) {
+        return new \WP_REST_Response(array(
+            'success' => false,
+            'message' => __('Base URL must use the http or https scheme.', 'ai-provider-for-openai-compatible-servers'),
+        ), 200);
     }
 
     $clean_url = rtrim($base_url, '/') . '/models';
@@ -301,18 +366,24 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
         $headers['Authorization'] = 'Bearer ' . $api_key;
     }
 
-    // Merge custom headers.
+    // Merge custom headers, skipping anything that isn't a syntactically valid header.
     if (is_array($custom_headers)) {
         foreach ($custom_headers as $header) {
-            if (isset($header['key']) && isset($header['value']) && '' !== trim($header['key'])) {
-                $headers[$header['key']] = $header['value'];
+            if (!isset($header['key'], $header['value'])) {
+                continue;
             }
+            $key = trim((string) $header['key']);
+            $value = (string) $header['value'];
+            if ('' === $key || !is_valid_http_header_name($key) || !is_valid_http_header_value($value)) {
+                continue;
+            }
+            $headers[$key] = $value;
         }
     }
 
     // Temporarily add filter to allow local request target if it matches our base URL.
     $allow_local_filter = function(array $args, string $url) use ($base_url) {
-        if (strpos($url, rtrim($base_url, '/')) === 0) {
+        if (url_matches_base_url_origin($url, $base_url)) {
             $args['reject_unsafe_urls'] = false;
         }
         return $args;
@@ -320,8 +391,9 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
     add_filter('http_request_args', $allow_local_filter, 10, 2);
 
     $response = wp_remote_get($clean_url, array(
-        'headers' => $headers,
-        'timeout' => 15,
+        'headers'    => $headers,
+        'timeout'    => 15,
+        'redirection' => 0,
     ));
 
     remove_filter('http_request_args', $allow_local_filter);
@@ -339,7 +411,7 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
     if ($code < 200 || $code >= 300) {
         return new \WP_REST_Response(array(
             'success' => false,
-            'message' => sprintf(__('Server returned status %d. Response: %s', 'ai-provider-for-openai-compatible-servers'), $code, substr($body, 0, 200)),
+            'message' => sprintf(__('Server returned status %d.', 'ai-provider-for-openai-compatible-servers'), $code),
         ), 200);
     }
 

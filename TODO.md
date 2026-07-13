@@ -18,9 +18,9 @@ Issues flagged during the 2026-07-13 code review, roughly in priority order. Che
 
 ## 🟡 Security hardening (functional as-is, but tighten)
 
-- [ ] **Constrain the `test-connection` SSRF surface.** `openai-compatible-servers/v1/test-connection` fetches an arbitrary user-supplied URL with `reject_unsafe_urls => false` and echoes the response back. It's gated by `manage_options`, which is defensible, but: validate the scheme (http/https only), consider limiting redirects (`'redirection' => 0`), and don't return raw upstream response bodies in error messages.
-- [ ] **Validate custom header names/values.** Both the REST handler (`plugin.php`) and `createRequest()` pass user-provided header keys/values through unvalidated. Reject invalid header-name characters (CR/LF at minimum).
-- [ ] **`http_request_args` filter scope.** `allow_local_requests_for_our_connector()` disables `reject_unsafe_urls` via a `strpos(...) === 0` prefix match on the configured base URL. Fine, but make sure the match can't be broadened accidentally (e.g. base URL `http://host` also matches `http://host.evil.com` — compare against `rtrim($base_url,'/') . '/'` or parse hosts).
+- [x] **Constrain the `test-connection` SSRF surface.** `openai-compatible-servers/v1/test-connection` fetches an arbitrary user-supplied URL with `reject_unsafe_urls => false` and echoes the response back. It's gated by `manage_options`, which is defensible, but: validate the scheme (http/https only), consider limiting redirects (`'redirection' => 0`), and don't return raw upstream response bodies in error messages.
+- [x] **Validate custom header names/values.** Both the REST handler (`plugin.php`) and `createRequest()` pass user-provided header keys/values through unvalidated. Reject invalid header-name characters (CR/LF at minimum).
+- [x] **`http_request_args` filter scope.** `allow_local_requests_for_our_connector()` disables `reject_unsafe_urls` via a `strpos(...) === 0` prefix match on the configured base URL. Fine, but make sure the match can't be broadened accidentally (e.g. base URL `http://host` also matches `http://host.evil.com` — compare against `rtrim($base_url,'/') . '/'` or parse hosts).
 
 ## 🟢 Cleanup / polish
 
@@ -29,5 +29,5 @@ Issues flagged during the 2026-07-13 code review, roughly in priority order. Che
 - [ ] **JS lint pass.** `npm run lint:js` currently reports ~665 errors: mostly Prettier tabs-vs-spaces (auto-fixable via `npm run lint:js:fix`), plus real items — `no-console` statements, two `__()` calls missing the text domain (`'Checking…'`, `'Cancel'`, `'Edit'`, `'Set up'` around line 474), missing translator comments for `sprintf`-style strings, unused `plugin` prop and `isFetchingModels`, and two `react-hooks/exhaustive-deps` warnings.
 - [ ] **PHP lint pass.** `composer lint` reports 44 errors / 23 warnings: 43 auto-fixable via `composer format`; real items are one unescaped exception message (`WordPress.Security.EscapeOutput.ExceptionNotEscaped` in `src/Provider/OpenAiCompatibleServersProvider.php`), one missing translators comment in `plugin.php`, and long-line warnings.
 - [ ] **Script module version is hardcoded** (`'1.0.0'`) in `wp_register_script_module()` — define a plugin version constant and reuse it (or use `filemtime()` in dev).
-- [ ] **Inconsistent REST error statuses.** `handle_test_connection_rest()` returns HTTP 400 for a missing base URL but HTTP 200 with `success: false` for all other failures — pick one convention.
+- [x] **Inconsistent REST error statuses.** `handle_test_connection_rest()` returns HTTP 400 for a missing base URL but HTTP 200 with `success: false` for all other failures — pick one convention.
 - [ ] **`readme.txt` placeholders.** `Contributors: wordpressdotorg` is a placeholder — set the real wp.org username(s) before submission. Optional: add Screenshots and Donate link sections (validator notes).

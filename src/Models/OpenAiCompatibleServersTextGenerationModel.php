@@ -30,14 +30,24 @@ class OpenAiCompatibleServersTextGenerationModel extends AbstractOpenAiCompatibl
      */
     protected function createRequest(HttpMethodEnum $method, string $path, array $headers = [], $data = null): Request
     {
-        // Inject custom headers configured in settings.
+        // Inject custom headers configured in settings, skipping anything that isn't a
+        // syntactically valid HTTP header (guards against CR/LF and other injection attempts).
         $custom_headers_str = get_option('connectors_ai_openai_compatible_servers_headers', '[]');
         $custom_headers = json_decode($custom_headers_str, true);
         if (is_array($custom_headers)) {
             foreach ($custom_headers as $header) {
-                if (isset($header['key']) && isset($header['value']) && '' !== trim($header['key'])) {
-                    $headers[$header['key']] = $header['value'];
+                if (!isset($header['key'], $header['value'])) {
+                    continue;
                 }
+                $key = trim((string) $header['key']);
+                $value = (string) $header['value'];
+                if ('' === $key || !preg_match('/^[!#$%&\'*+\-.^_`|~0-9A-Za-z]+$/', $key)) {
+                    continue;
+                }
+                if (false !== strpos($value, "\r") || false !== strpos($value, "\n")) {
+                    continue;
+                }
+                $headers[$key] = $value;
             }
         }
 
