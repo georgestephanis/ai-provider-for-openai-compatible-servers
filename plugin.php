@@ -4,7 +4,7 @@
  * Plugin Name: AI Provider for OpenAI Compatible Servers
  * Plugin URI: https://github.com/georgestephanis/ai-provider-for-openai-compatible-servers
  * Description: Run local OpenAI-compatible servers (LM Studio, Ollama, vLLM, etc.) with the WordPress AI Client.
- * Requires at least: 6.9
+ * Requires at least: 7.0
  * Requires PHP: 7.4
  * Version: 1.0.0
  * Author: George Stephanis
@@ -29,7 +29,7 @@ if (!defined('ABSPATH')) {
 
 const VERSION = '1.0.0';
 
-require_once __DIR__ . '/src/autoload.php';
+require_once __DIR__ . '/includes/autoload.php';
 
 /**
  * Registers the OpenAI Compatible Servers provider with the AI Client.

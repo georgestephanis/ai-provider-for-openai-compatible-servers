@@ -3,7 +3,7 @@
     <description>PSR-12 formatting (matching the WordPress AI Client SDK style) plus WordPress security, i18n, and escaping sniffs.</description>
 
     <file>plugin.php</file>
-    <file>src</file>
+    <file>includes</file>
 
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
@@ -19,7 +19,7 @@
     <!-- The plugin bootstrap and autoloader legitimately mix declarations and side effects. -->
     <rule ref="PSR1.Files.SideEffects">
         <exclude-pattern>plugin\.php$</exclude-pattern>
-        <exclude-pattern>src/autoload\.php$</exclude-pattern>
+        <exclude-pattern>includes/autoload\.php$</exclude-pattern>
     </rule>
 
     <!-- WordPress-specific correctness and security sniffs. -->

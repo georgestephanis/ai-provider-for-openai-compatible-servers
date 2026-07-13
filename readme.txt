@@ -1,8 +1,8 @@
 === AI Provider for OpenAI Compatible Servers ===
 Contributors: georgestephanis
 Tags: ai, ollama, openai, llm, local ai
-Requires at least: 6.9
-Tested up to: 6.9
+Requires at least: 7.0
+Tested up to: 7.0
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPL-2.0-or-later
