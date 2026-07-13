@@ -642,8 +642,18 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 	};
 
 	// Swap in the detected server's brand icon when we have one; otherwise fall back
-	// to the generic logo registered by the provider metadata.
-	const resolvedLogo = PROVIDER_ICONS[ detectedProvider ] || logo;
+	// to the generic logo registered by the provider metadata. Core passes `logo` as
+	// an already-rendered <img> element (see Ka() in connectors-home/content.js), so
+	// the detected icon must be wrapped the same way rather than passed as a bare URL.
+	const providerIconUrl = PROVIDER_ICONS[ detectedProvider ];
+	const resolvedLogo = providerIconUrl
+		? createElement( 'img', {
+				src: providerIconUrl,
+				alt: '',
+				width: 40,
+				height: 40,
+		  } )
+		: logo;
 
 	return (
 		<ConnectorItem
