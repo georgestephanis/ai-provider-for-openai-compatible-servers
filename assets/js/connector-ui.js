@@ -867,7 +867,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 							onChange: ( val ) => setTempDisableThinking( val ),
 							disabled: isBusy,
 							help: __(
-								'Optimizes context usage and prevents long thinking preambles for reasoning models (e.g. Qwen 3.7 or DeepSeek-R1).',
+								'Optimizes context usage and prevents long thinking preambles for reasoning models (e.g. Qwen3.6-27B or DeepSeek-R1).',
 								'ai-provider-for-openai-compatible-servers'
 							),
 						} ),
