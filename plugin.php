@@ -520,16 +520,19 @@ function enqueue_connector_scripts(string $hook_suffix): void
         return;
     }
 
+    $asset_file = __DIR__ . '/build/connector-ui.asset.php';
+    $asset = file_exists($asset_file)
+        ? require $asset_file
+        : array(
+            'dependencies' => array('@wordpress/connectors'),
+            'version'      => VERSION,
+        );
+
     wp_register_script_module(
         'openai-compatible-servers-connector-ui',
-        plugin_dir_url(__FILE__) . 'assets/js/connector-ui.js',
-        array(
-            array(
-                'import' => 'static',
-                'id'     => '@wordpress/connectors',
-            ),
-        ),
-        VERSION
+        plugin_dir_url(__FILE__) . 'build/connector-ui.js',
+        $asset['dependencies'],
+        $asset['version']
     );
     wp_enqueue_script_module('openai-compatible-servers-connector-ui');
 }

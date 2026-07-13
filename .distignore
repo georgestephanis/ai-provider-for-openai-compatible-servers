@@ -18,3 +18,5 @@ phpcs.xml.dist
 AGENTS.md
 README.md
 *.zip
+babel.config.js
+webpack.config.js

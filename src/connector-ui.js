@@ -1,7 +1,7 @@
-/* eslint-disable @wordpress/no-unsafe-wp-apis -- Connectors settings API is experimental as of WP 6.9; no stable alternative exists yet. */
+/* eslint-disable @wordpress/no-unsafe-wp-apis -- Connectors settings API is experimental as of WP 7.0; no stable alternative exists yet. */
 import {
 	__experimentalRegisterConnector,
-	__experimentalConnectorItem,
+	__experimentalConnectorItem as ConnectorItem,
 } from '@wordpress/connectors';
 /* eslint-enable @wordpress/no-unsafe-wp-apis */
 
@@ -10,12 +10,16 @@ const {
 	Button,
 	RadioControl,
 	CheckboxControl,
-	__experimentalHStack,
-	__experimentalVStack,
+	__experimentalHStack: HStack,
+	__experimentalVStack: VStack,
 } = window.wp.components;
-const { useState, useEffect, createElement: el } = window.wp.element;
+const { useState, useEffect, createElement, Fragment } = window.wp.element;
 const { __, sprintf } = window.wp.i18n;
 const { useSelect, useDispatch } = window.wp.data;
+
+// createElement/Fragment back the classic JSX pragma configured in babel.config.js.
+// eslint-disable-next-line no-unused-vars -- referenced by compiled JSX output.
+const _pragmaRefs = [ createElement, Fragment ];
 
 const apiKeySettingName = 'connectors_ai_openai_compatible_servers_api_key';
 const baseUrlSettingName = 'connectors_ai_openai_compatible_servers_base_url';
@@ -35,22 +39,21 @@ const enableR1FormatSettingName =
 /**
  * Clean badge component to show connection status.
  */
-const ConnectedBadge = () =>
-	el(
-		'span',
-		{
-			style: {
-				color: '#345b37',
-				backgroundColor: '#eff8f0',
-				padding: '4px 12px',
-				borderRadius: '2px',
-				fontSize: '13px',
-				fontWeight: 500,
-				whiteSpace: 'nowrap',
-			},
-		},
-		__( 'Connected', 'ai-provider-for-openai-compatible-servers' )
-	);
+const ConnectedBadge = () => (
+	<span
+		style={ {
+			color: '#345b37',
+			backgroundColor: '#eff8f0',
+			padding: '4px 12px',
+			borderRadius: '2px',
+			fontSize: '13px',
+			fontWeight: 500,
+			whiteSpace: 'nowrap',
+		} }
+	>
+		{ __( 'Connected', 'ai-provider-for-openai-compatible-servers' ) }
+	</span>
+);
 
 /**
  * Label for the connector's expand/collapse toggle button.
@@ -605,128 +608,120 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 		}
 	};
 
-	return el(
-		__experimentalConnectorItem,
-		{
-			logo,
-			name,
-			description,
-			actionArea: el(
-				__experimentalHStack,
-				{ spacing: 3, expanded: false },
-				isConnected && el( ConnectedBadge ),
-				el(
-					Button,
-					{
-						variant:
-							isExpanded || isConnected
-								? 'tertiary'
-								: 'secondary',
-						size: 'compact',
-						onClick: () => setIsExpanded( ! isExpanded ),
-						disabled: isBusy,
-						isBusy,
-					},
-					getToggleButtonLabel( isBusy, isExpanded, isConnected )
-				)
-			),
-		},
-		isExpanded &&
-			el(
-				__experimentalVStack,
-				{
-					spacing: 4,
-					className: 'connector-settings',
-					style: { marginTop: '16px' },
-				},
-				el( TextControl, {
-					__next40pxDefaultSize: true,
-					label: __(
-						'Base URL (URL & Port)',
-						'ai-provider-for-openai-compatible-servers'
-					),
-					value: tempBaseUrl,
-					onChange: ( val ) => setTempBaseUrl( val ),
-					placeholder: 'http://localhost:11434/v1',
-					disabled: isBusy,
-					help: __(
-						'The base URL and port of your local OpenAI-compatible API server.',
-						'ai-provider-for-openai-compatible-servers'
-					),
-				} ),
-				el( TextControl, {
-					__next40pxDefaultSize: true,
-					id: 'connectors_openai_compatible_servers_api_key_input',
-					label: __(
-						'API Key',
-						'ai-provider-for-openai-compatible-servers'
-					),
-					value: tempApiKey,
-					onChange: ( val ) => setTempApiKey( val ),
-					type: 'text',
-					autoComplete: 'off',
-					placeholder: 'local',
-					disabled: isBusy,
-					help: __(
-						'Optional. Dummy value used if local server does not require key.',
-						'ai-provider-for-openai-compatible-servers'
-					),
-				} ),
+	return (
+		<ConnectorItem
+			logo={ logo }
+			name={ name }
+			description={ description }
+			actionArea={
+				<HStack spacing={ 3 } expanded={ false }>
+					{ isConnected && <ConnectedBadge /> }
+					<Button
+						variant={
+							isExpanded || isConnected ? 'tertiary' : 'secondary'
+						}
+						size="compact"
+						onClick={ () => setIsExpanded( ! isExpanded ) }
+						disabled={ isBusy }
+						isBusy={ isBusy }
+					>
+						{ getToggleButtonLabel(
+							isBusy,
+							isExpanded,
+							isConnected
+						) }
+					</Button>
+				</HStack>
+			}
+		>
+			{ isExpanded && (
+				<VStack
+					spacing={ 4 }
+					className="connector-settings"
+					style={ { marginTop: '16px' } }
+				>
+					<TextControl
+						__next40pxDefaultSize
+						label={ __(
+							'Base URL (URL & Port)',
+							'ai-provider-for-openai-compatible-servers'
+						) }
+						value={ tempBaseUrl }
+						onChange={ ( val ) => setTempBaseUrl( val ) }
+						placeholder="http://localhost:11434/v1"
+						disabled={ isBusy }
+						help={ __(
+							'The base URL and port of your local OpenAI-compatible API server.',
+							'ai-provider-for-openai-compatible-servers'
+						) }
+					/>
+					<TextControl
+						__next40pxDefaultSize
+						id="connectors_openai_compatible_servers_api_key_input"
+						label={ __(
+							'API Key',
+							'ai-provider-for-openai-compatible-servers'
+						) }
+						value={ tempApiKey }
+						onChange={ ( val ) => setTempApiKey( val ) }
+						type="text"
+						autoComplete="off"
+						placeholder="local"
+						disabled={ isBusy }
+						help={ __(
+							'Optional. Dummy value used if local server does not require key.',
+							'ai-provider-for-openai-compatible-servers'
+						) }
+					/>
 
-				el(
-					__experimentalHStack,
-					{
-						alignment: 'flex-end',
-						justify: 'space-between',
-						spacing: 4,
-						style: { marginBottom: '16px' },
-					},
-					el( RadioControl, {
-						label: __(
-							'Model Selection Mode',
-							'ai-provider-for-openai-compatible-servers'
-						),
-						selected: tempModelMode,
-						options: [
-							{
-								label: __(
-									'Autodetect all models from server',
-									'ai-provider-for-openai-compatible-servers'
-								),
-								value: 'autodetect',
-							},
-							{
-								label: __(
-									'Manually specify models',
-									'ai-provider-for-openai-compatible-servers'
-								),
-								value: 'manual',
-							},
-						],
-						onChange: ( val ) => setTempModelMode( val ),
-						disabled: isBusy || isTesting,
-					} ),
-					el(
-						Button,
-						{
-							__next40pxDefaultSize: true,
-							variant: 'secondary',
-							onClick: handleTestCredentials,
-							disabled: isBusy || isTesting || ! hasInitialized,
-							isBusy: isTesting,
-							style: { marginBottom: '8px' },
-						},
-						__(
-							'Test Credentials',
-							'ai-provider-for-openai-compatible-servers'
-						)
-					)
-				),
-				testResult &&
-					el(
-						'div',
-						{
-							style: {
+					<HStack
+						alignment="flex-end"
+						justify="space-between"
+						spacing={ 4 }
+						style={ { marginBottom: '16px' } }
+					>
+						<RadioControl
+							label={ __(
+								'Model Selection Mode',
+								'ai-provider-for-openai-compatible-servers'
+							) }
+							selected={ tempModelMode }
+							options={ [
+								{
+									label: __(
+										'Autodetect all models from server',
+										'ai-provider-for-openai-compatible-servers'
+									),
+									value: 'autodetect',
+								},
+								{
+									label: __(
+										'Manually specify models',
+										'ai-provider-for-openai-compatible-servers'
+									),
+									value: 'manual',
+								},
+							] }
+							onChange={ ( val ) => setTempModelMode( val ) }
+							disabled={ isBusy || isTesting }
+						/>
+						<Button
+							__next40pxDefaultSize
+							variant="secondary"
+							onClick={ handleTestCredentials }
+							disabled={ isBusy || isTesting || ! hasInitialized }
+							isBusy={ isTesting }
+							style={ { marginBottom: '8px' } }
+						>
+							{ __(
+								'Test Credentials',
+								'ai-provider-for-openai-compatible-servers'
+							) }
+						</Button>
+					</HStack>
+					{ testResult && (
+						<div
+							style={ {
 								fontSize: '13px',
 								color: testResult.success
 									? '#2e7d32'
@@ -740,289 +735,277 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 								display: 'flex',
 								alignItems: 'center',
 								gap: '8px',
-							},
-						},
-						testResult.success ? '✔ ' : '✖ ',
-						testResult.message
-					),
-				tempModelMode === 'manual' &&
-					el(
-						__experimentalVStack,
-						{ spacing: 4 },
-						availableModels.length > 0 &&
-							el(
-								__experimentalVStack,
-								{ spacing: 2 },
-								el(
-									'label',
-									{
-										style: {
+							} }
+						>
+							{ testResult.success ? '✔ ' : '✖ ' }
+							{ testResult.message }
+						</div>
+					) }
+					{ tempModelMode === 'manual' && (
+						<VStack spacing={ 4 }>
+							{ availableModels.length > 0 && (
+								<VStack spacing={ 2 }>
+									<span
+										style={ {
 											fontWeight: '600',
 											fontSize: '13px',
 											display: 'block',
 											marginBottom: '4px',
-										},
-									},
-									__(
-										'Detected Models (select to enable)',
-										'ai-provider-for-openai-compatible-servers'
-									)
-								),
-								availableModels.map( ( model ) =>
-									el( CheckboxControl, {
-										key: model.id,
-										label: model.id,
-										checked:
-											tempSelectedCheckboxModels.includes(
+										} }
+									>
+										{ __(
+											'Detected Models (select to enable)',
+											'ai-provider-for-openai-compatible-servers'
+										) }
+									</span>
+									{ availableModels.map( ( model ) => (
+										<CheckboxControl
+											key={ model.id }
+											label={ model.id }
+											checked={ tempSelectedCheckboxModels.includes(
 												model.id
-											),
-										onChange: ( isChecked ) => {
-											if ( isChecked ) {
-												setTempSelectedCheckboxModels( [
-													...tempSelectedCheckboxModels,
-													model.id,
-												] );
-											} else {
-												setTempSelectedCheckboxModels(
-													tempSelectedCheckboxModels.filter(
-														( m ) => m !== model.id
-													)
-												);
-											}
-										},
-									} )
-								)
-							),
-						el( TextControl, {
-							__next40pxDefaultSize: true,
-							label: __(
-								'Other Models (not listed above)',
-								'ai-provider-for-openai-compatible-servers'
-							),
-							value: tempExtraManualModels,
-							onChange: ( val ) =>
-								setTempExtraManualModels( val ),
-							placeholder: 'llama3.2, mistral',
-							disabled: isBusy,
-							help: __(
-								'Enter comma-separated names of any other models you want to enable that are not in the detected list above.',
-								'ai-provider-for-openai-compatible-servers'
-							),
-						} )
-					),
-				el(
-					'details',
-					{
-						style: {
+											) }
+											onChange={ ( isChecked ) => {
+												if ( isChecked ) {
+													setTempSelectedCheckboxModels(
+														[
+															...tempSelectedCheckboxModels,
+															model.id,
+														]
+													);
+												} else {
+													setTempSelectedCheckboxModels(
+														tempSelectedCheckboxModels.filter(
+															( m ) =>
+																m !== model.id
+														)
+													);
+												}
+											} }
+										/>
+									) ) }
+								</VStack>
+							) }
+							<TextControl
+								__next40pxDefaultSize
+								label={ __(
+									'Other Models (not listed above)',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+								value={ tempExtraManualModels }
+								onChange={ ( val ) =>
+									setTempExtraManualModels( val )
+								}
+								placeholder="llama3.2, mistral"
+								disabled={ isBusy }
+								help={ __(
+									'Enter comma-separated names of any other models you want to enable that are not in the detected list above.',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+							/>
+						</VStack>
+					) }
+					<details
+						style={ {
 							marginTop: '16px',
 							borderTop: '1px solid #eee',
 							paddingTop: '16px',
-						},
-					},
-					el(
-						'summary',
-						{
-							style: {
+						} }
+					>
+						<summary
+							style={ {
 								fontWeight: '600',
 								cursor: 'pointer',
 								marginBottom: '12px',
-							},
-						},
-						__(
-							'Advanced Settings',
-							'ai-provider-for-openai-compatible-servers'
-						)
-					),
-					el(
-						__experimentalVStack,
-						{ spacing: 4 },
-						el( TextControl, {
-							type: 'number',
-							__next40pxDefaultSize: true,
-							label: __(
-								'Context Length (tokens)',
+							} }
+						>
+							{ __(
+								'Advanced Settings',
 								'ai-provider-for-openai-compatible-servers'
-							),
-							value: tempContextLength || '',
-							onChange: ( val ) =>
-								setTempContextLength(
-									val ? parseInt( val, 10 ) : 0
-								),
-							placeholder: __(
-								'e.g., 8192',
-								'ai-provider-for-openai-compatible-servers'
-							),
-							disabled: isBusy,
-							help: __(
-								'Optional. Configures num_ctx and max_tokens parameters to control server memory limits.',
-								'ai-provider-for-openai-compatible-servers'
-							),
-						} ),
-						el( CheckboxControl, {
-							label: __(
-								'Disable thinking/reasoning blocks',
-								'ai-provider-for-openai-compatible-servers'
-							),
-							checked: tempDisableThinking,
-							onChange: ( val ) => setTempDisableThinking( val ),
-							disabled: isBusy,
-							help: __(
-								'Optimizes context usage and prevents long thinking preambles for reasoning models (e.g. Qwen3.6-27B or DeepSeek-R1).',
-								'ai-provider-for-openai-compatible-servers'
-							),
-						} ),
-						el( CheckboxControl, {
-							label: __(
-								'Supports Images',
-								'ai-provider-for-openai-compatible-servers'
-							),
-							checked: tempSupportsImages,
-							onChange: ( val ) => setTempSupportsImages( val ),
-							disabled: isBusy,
-							help: __(
-								'Enable this option if your local models support multimodal image inputs (e.g., Llama 3.2 Vision).',
-								'ai-provider-for-openai-compatible-servers'
-							),
-						} ),
-						el( CheckboxControl, {
-							label: __(
-								'Enable R1 Messages Format',
-								'ai-provider-for-openai-compatible-servers'
-							),
-							checked: tempEnableR1Format,
-							onChange: ( val ) => setTempEnableR1Format( val ),
-							disabled: isBusy,
-							help: __(
-								'Wraps system instructions within the first user message instead of a separate system message (necessary for DeepSeek-R1 compatibility).',
-								'ai-provider-for-openai-compatible-servers'
-							),
-						} ),
+							) }
+						</summary>
+						<VStack spacing={ 4 }>
+							<TextControl
+								type="number"
+								__next40pxDefaultSize
+								label={ __(
+									'Context Length (tokens)',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+								value={ tempContextLength || '' }
+								onChange={ ( val ) =>
+									setTempContextLength(
+										val ? parseInt( val, 10 ) : 0
+									)
+								}
+								placeholder={ __(
+									'e.g., 8192',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+								disabled={ isBusy }
+								help={ __(
+									'Optional. Configures num_ctx and max_tokens parameters to control server memory limits.',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+							/>
+							<CheckboxControl
+								label={ __(
+									'Disable thinking/reasoning blocks',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+								checked={ tempDisableThinking }
+								onChange={ ( val ) =>
+									setTempDisableThinking( val )
+								}
+								disabled={ isBusy }
+								help={ __(
+									'Optimizes context usage and prevents long thinking preambles for reasoning models (e.g. Qwen3.6–27B or DeepSeek-R1).',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+							/>
+							<CheckboxControl
+								label={ __(
+									'Supports Images',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+								checked={ tempSupportsImages }
+								onChange={ ( val ) =>
+									setTempSupportsImages( val )
+								}
+								disabled={ isBusy }
+								help={ __(
+									'Enable this option if your local models support multimodal image inputs (e.g., Llama 3.2 Vision).',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+							/>
+							<CheckboxControl
+								label={ __(
+									'Enable R1 Messages Format',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+								checked={ tempEnableR1Format }
+								onChange={ ( val ) =>
+									setTempEnableR1Format( val )
+								}
+								disabled={ isBusy }
+								help={ __(
+									'Wraps system instructions within the first user message instead of a separate system message (necessary for DeepSeek-R1 compatibility).',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+							/>
 
-						// Custom HTTP Headers editor.
-						el(
-							__experimentalVStack,
-							{
-								spacing: 2,
-								style: {
+							{ /* Custom HTTP Headers editor. */ }
+							<VStack
+								spacing={ 2 }
+								style={ {
 									borderTop: '1px dashed #eee',
 									paddingTop: '16px',
 									marginTop: '8px',
-								},
-							},
-							el(
-								'label',
-								{
-									style: {
+								} }
+							>
+								<span
+									style={ {
 										fontWeight: '600',
 										fontSize: '13px',
 										display: 'block',
-									},
-								},
-								__(
-									'Custom HTTP Headers',
-									'ai-provider-for-openai-compatible-servers'
-								)
-							),
-							tempHeaders.map( ( header, idx ) =>
-								el(
-									__experimentalHStack,
-									{ key: idx, spacing: 2 },
-									el( TextControl, {
-										__next40pxDefaultSize: true,
-										placeholder: __(
-											'Header Name',
-											'ai-provider-for-openai-compatible-servers'
-										),
-										value: header.key,
-										onChange: ( val ) => {
-											const next = [ ...tempHeaders ];
-											next[ idx ].key = val;
-											setTempHeaders( next );
-										},
-									} ),
-									el( TextControl, {
-										__next40pxDefaultSize: true,
-										placeholder: __(
-											'Value',
-											'ai-provider-for-openai-compatible-servers'
-										),
-										value: header.value,
-										onChange: ( val ) => {
-											const next = [ ...tempHeaders ];
-											next[ idx ].value = val;
-											setTempHeaders( next );
-										},
-									} ),
-									el(
-										Button,
-										{
-											variant: 'secondary',
-											onClick: () => {
+									} }
+								>
+									{ __(
+										'Custom HTTP Headers',
+										'ai-provider-for-openai-compatible-servers'
+									) }
+								</span>
+								{ tempHeaders.map( ( header, idx ) => (
+									<HStack key={ idx } spacing={ 2 }>
+										<TextControl
+											__next40pxDefaultSize
+											placeholder={ __(
+												'Header Name',
+												'ai-provider-for-openai-compatible-servers'
+											) }
+											value={ header.key }
+											onChange={ ( val ) => {
+												const next = [ ...tempHeaders ];
+												next[ idx ].key = val;
+												setTempHeaders( next );
+											} }
+										/>
+										<TextControl
+											__next40pxDefaultSize
+											placeholder={ __(
+												'Value',
+												'ai-provider-for-openai-compatible-servers'
+											) }
+											value={ header.value }
+											onChange={ ( val ) => {
+												const next = [ ...tempHeaders ];
+												next[ idx ].value = val;
+												setTempHeaders( next );
+											} }
+										/>
+										<Button
+											variant="secondary"
+											onClick={ () => {
 												const next = tempHeaders.filter(
 													( _, i ) => i !== idx
 												);
 												setTempHeaders( next );
-											},
-										},
-										__(
-											'Remove',
-											'ai-provider-for-openai-compatible-servers'
-										)
-									)
-								)
-							),
-							el(
-								Button,
-								{
-									variant: 'secondary',
-									size: 'small',
-									onClick: () => {
+											} }
+										>
+											{ __(
+												'Remove',
+												'ai-provider-for-openai-compatible-servers'
+											) }
+										</Button>
+									</HStack>
+								) ) }
+								<Button
+									variant="secondary"
+									size="small"
+									onClick={ () => {
 										setTempHeaders( [
 											...tempHeaders,
 											{ key: '', value: '' },
 										] );
-									},
-								},
-								__(
-									'Add Header',
-									'ai-provider-for-openai-compatible-servers'
-								)
-							)
-						)
-					)
-				),
-				el(
-					__experimentalHStack,
-					{ justify: 'space-between', style: { width: '100%' } },
-					el(
-						Button,
-						{
-							__next40pxDefaultSize: true,
-							variant: 'primary',
-							disabled: isBusy || ! hasInitialized,
-							onClick: handleSave,
-						},
-						__(
-							'Save',
-							'ai-provider-for-openai-compatible-servers'
-						)
-					),
-					isConnected &&
-						el(
-							Button,
-							{
-								variant: 'link',
-								isDestructive: true,
-								onClick: handleRemove,
-								disabled: isBusy,
-							},
-							__(
-								'Remove and replace',
+									} }
+								>
+									{ __(
+										'Add Header',
+										'ai-provider-for-openai-compatible-servers'
+									) }
+								</Button>
+							</VStack>
+						</VStack>
+					</details>
+					<HStack justify="space-between" style={ { width: '100%' } }>
+						<Button
+							__next40pxDefaultSize
+							variant="primary"
+							disabled={ isBusy || ! hasInitialized }
+							onClick={ handleSave }
+						>
+							{ __(
+								'Save',
 								'ai-provider-for-openai-compatible-servers'
-							)
-						)
-				)
-			)
+							) }
+						</Button>
+						{ isConnected && (
+							<Button
+								variant="link"
+								isDestructive
+								onClick={ handleRemove }
+								disabled={ isBusy }
+							>
+								{ __(
+									'Remove and replace',
+									'ai-provider-for-openai-compatible-servers'
+								) }
+							</Button>
+						) }
+					</HStack>
+				</VStack>
+			) }
+		</ConnectorItem>
 	);
 }
 

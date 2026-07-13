@@ -8,14 +8,18 @@
     "plugin.php",
     "uninstall.php",
     "readme.txt",
+    "includes/**",
     "src/**",
+    "build/**",
     "assets/**"
   ],
   "scripts": {
-    "lint:js": "wp-scripts lint-js assets/js",
-    "lint:js:fix": "wp-scripts lint-js assets/js --fix",
+    "build": "wp-scripts build --experimental-modules",
+    "start": "wp-scripts start --experimental-modules",
+    "lint:js": "wp-scripts lint-js src",
+    "lint:js:fix": "wp-scripts lint-js src --fix",
     "lint:css": "wp-scripts lint-style 'assets/**/*.css' --allow-empty-input",
-    "format": "wp-scripts format assets/js",
+    "format": "wp-scripts format src",
     "plugin-zip": "wp-scripts plugin-zip"
   },
   "devDependencies": {
