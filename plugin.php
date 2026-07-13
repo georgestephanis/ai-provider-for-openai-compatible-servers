@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Plugin Name: AI Provider for OpenAI Compatible Servers
  * Plugin URI: https://github.com/georgestephanis/ai-provider-for-openai-compatible-servers
- * Description: Clean, lean provider to run local OpenAI-compatible servers (LM Studio, Ollama, vLLM, etc.) with the WordPress AI Client.
+ * Description: Run local OpenAI-compatible servers (LM Studio, Ollama, vLLM, etc.) with the WordPress AI Client.
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Version: 1.0.0
@@ -68,8 +69,14 @@ function register_settings(): void
         'connectors_ai_openai_compatible_servers_api_key',
         array(
             'type'              => 'string',
-            'label'             => __( 'OpenAI Compatible Servers API Key', 'ai-provider-for-openai-compatible-servers' ),
-            'description'       => __( 'API key for the OpenAI Compatible Servers connector.', 'ai-provider-for-openai-compatible-servers' ),
+            'label'             => __(
+                'OpenAI Compatible Servers API Key',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'API key for the OpenAI Compatible Servers connector.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
             'default'           => '',
             'show_in_rest'      => true,
             'sanitize_callback' => 'sanitize_text_field',
@@ -82,8 +89,14 @@ function register_settings(): void
         'connectors_ai_openai_compatible_servers_base_url',
         array(
             'type'              => 'string',
-            'label'             => __( 'OpenAI Compatible Servers Base URL', 'ai-provider-for-openai-compatible-servers' ),
-            'description'       => __( 'Base URL for the OpenAI Compatible Servers connector.', 'ai-provider-for-openai-compatible-servers' ),
+            'label'             => __(
+                'OpenAI Compatible Servers Base URL',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'Base URL for the OpenAI Compatible Servers connector.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
             'default'           => 'http://localhost:11434/v1',
             'show_in_rest'      => true,
             'sanitize_callback' => 'esc_url_raw',
@@ -96,8 +109,14 @@ function register_settings(): void
         'connectors_ai_openai_compatible_servers_model_mode',
         array(
             'type'              => 'string',
-            'label'             => __( 'Model Selection Mode', 'ai-provider-for-openai-compatible-servers' ),
-            'description'       => __( 'Model selection mode (autodetect or manual).', 'ai-provider-for-openai-compatible-servers' ),
+            'label'             => __(
+                'Model Selection Mode',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'Model selection mode (autodetect or manual).',
+                'ai-provider-for-openai-compatible-servers'
+            ),
             'default'           => 'autodetect',
             'show_in_rest'      => true,
             'sanitize_callback' => 'sanitize_text_field',
@@ -110,8 +129,14 @@ function register_settings(): void
         'connectors_ai_openai_compatible_servers_models',
         array(
             'type'              => 'string',
-            'label'             => __( 'Manual Model List', 'ai-provider-for-openai-compatible-servers' ),
-            'description'       => __( 'List of manually specified models.', 'ai-provider-for-openai-compatible-servers' ),
+            'label'             => __(
+                'Manual Model List',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'List of manually specified models.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
             'default'           => '',
             'show_in_rest'      => true,
             'sanitize_callback' => 'sanitize_text_field',
@@ -124,8 +149,14 @@ function register_settings(): void
         'connectors_ai_openai_compatible_servers_context_length',
         array(
             'type'              => 'integer',
-            'label'             => __( 'Context Length', 'ai-provider-for-openai-compatible-servers' ),
-            'description'       => __( 'Maximum context length in tokens.', 'ai-provider-for-openai-compatible-servers' ),
+            'label'             => __(
+                'Context Length',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'Maximum context length in tokens.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
             'default'           => 0,
             'show_in_rest'      => true,
             'sanitize_callback' => 'absint',
@@ -138,8 +169,14 @@ function register_settings(): void
         'connectors_ai_openai_compatible_servers_disable_thinking',
         array(
             'type'              => 'boolean',
-            'label'             => __( 'Disable Thinking', 'ai-provider-for-openai-compatible-servers' ),
-            'description'       => __( 'Disable thinking/reasoning blocks on thinking models.', 'ai-provider-for-openai-compatible-servers' ),
+            'label'             => __(
+                'Disable Thinking',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'Disable thinking/reasoning blocks on thinking models.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
             'default'           => false,
             'show_in_rest'      => true,
             'sanitize_callback' => 'rest_sanitize_boolean',
@@ -152,8 +189,14 @@ function register_settings(): void
         'connectors_ai_openai_compatible_servers_headers',
         array(
             'type'              => 'string',
-            'label'             => __( 'Custom HTTP Headers', 'ai-provider-for-openai-compatible-servers' ),
-            'description'       => __( 'Custom headers to pass with each request.', 'ai-provider-for-openai-compatible-servers' ),
+            'label'             => __(
+                'Custom HTTP Headers',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'Custom headers to pass with each request.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
             'default'           => '[]',
             'show_in_rest'      => true,
             'sanitize_callback' => 'sanitize_text_field',
@@ -166,8 +209,14 @@ function register_settings(): void
         'connectors_ai_openai_compatible_servers_supports_images',
         array(
             'type'              => 'boolean',
-            'label'             => __( 'Supports Images', 'ai-provider-for-openai-compatible-servers' ),
-            'description'       => __( 'Toggle image/multimodal support on the model.', 'ai-provider-for-openai-compatible-servers' ),
+            'label'             => __(
+                'Supports Images',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'Toggle image/multimodal support on the model.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
             'default'           => false,
             'show_in_rest'      => true,
             'sanitize_callback' => 'rest_sanitize_boolean',
@@ -180,8 +229,14 @@ function register_settings(): void
         'connectors_ai_openai_compatible_servers_enable_r1_format',
         array(
             'type'              => 'boolean',
-            'label'             => __( 'Enable R1 Message Format', 'ai-provider-for-openai-compatible-servers' ),
-            'description'       => __( 'Enables message folding for R1 reasoning compatibility.', 'ai-provider-for-openai-compatible-servers' ),
+            'label'             => __(
+                'Enable R1 Message Format',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'Enables message folding for R1 reasoning compatibility.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
             'default'           => false,
             'show_in_rest'      => true,
             'sanitize_callback' => 'rest_sanitize_boolean',
@@ -348,7 +403,10 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
     $custom_headers = isset($params['headers']) ? $params['headers'] : array();
 
     if (empty($base_url)) {
-        return new \WP_REST_Response(array('success' => false, 'message' => __('Base URL is required.', 'ai-provider-for-openai-compatible-servers')), 200);
+        return new \WP_REST_Response(array(
+            'success' => false,
+            'message' => __('Base URL is required.', 'ai-provider-for-openai-compatible-servers'),
+        ), 200);
     }
 
     $scheme = strtolower((string) wp_parse_url($base_url, PHP_URL_SCHEME));
@@ -384,7 +442,7 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
     }
 
     // Temporarily add filter to allow local request target if it matches our base URL.
-    $allow_local_filter = function(array $args, string $url) use ($base_url) {
+    $allow_local_filter = function (array $args, string $url) use ($base_url) {
         if (url_matches_base_url_origin($url, $base_url)) {
             $args['reject_unsafe_urls'] = false;
         }
@@ -413,6 +471,7 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
     if ($code < 200 || $code >= 300) {
         return new \WP_REST_Response(array(
             'success' => false,
+            /* translators: %d: HTTP status code */
             'message' => sprintf(__('Server returned status %d.', 'ai-provider-for-openai-compatible-servers'), $code),
         ), 200);
     }
@@ -421,7 +480,10 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
     if (!is_array($data) || !isset($data['data'])) {
         return new \WP_REST_Response(array(
             'success' => false,
-            'message' => __('Invalid JSON response from server /models endpoint.', 'ai-provider-for-openai-compatible-servers'),
+            'message' => __(
+                'Invalid JSON response from server /models endpoint.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
         ), 200);
     }
 
@@ -443,7 +505,8 @@ function enqueue_connector_scripts(string $hook_suffix): void
 {
     $current_screen = get_current_screen();
     $is_connectors_page = (
-        (isset($_GET['page']) && 'options-connectors-wp-admin' === $_GET['page']) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page-identity check, no state change.
+        (isset($_GET['page']) && 'options-connectors-wp-admin' === $_GET['page']) ||
         ($current_screen && 'options-connectors' === $current_screen->id)
     );
 

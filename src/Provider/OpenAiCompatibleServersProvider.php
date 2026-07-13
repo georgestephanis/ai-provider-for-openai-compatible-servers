@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenAI Compatible Servers provider class.
  *
@@ -63,7 +64,7 @@ class OpenAiCompatibleServersProvider extends AbstractApiProvider
         }
 
         throw new RuntimeException(
-            'Unsupported model capabilities: ' . implode(', ', $capabilities)
+            esc_html('Unsupported model capabilities: ' . implode(', ', $capabilities))
         );
     }
 
@@ -82,7 +83,10 @@ class OpenAiCompatibleServersProvider extends AbstractApiProvider
 
         $description = 'Local OpenAI-compatible servers (LM Studio, Ollama, vLLM, etc.)';
         if (function_exists('__')) {
-            $description = __('Local OpenAI-compatible servers (LM Studio, Ollama, vLLM, etc.)', 'ai-provider-for-openai-compatible-servers');
+            $description = __(
+                'Local OpenAI-compatible servers (LM Studio, Ollama, vLLM, etc.)',
+                'ai-provider-for-openai-compatible-servers'
+            );
         }
 
         $logoPath = dirname(__DIR__, 2) . '/assets/images/logo.svg';

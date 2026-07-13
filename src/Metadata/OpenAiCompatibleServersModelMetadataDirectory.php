@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenAI Compatible Servers model metadata directory class.
  *

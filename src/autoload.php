@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PSR-4 autoloader for the AI Provider for OpenAI Compatible Servers package.
  *

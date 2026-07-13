@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenAI Compatible Servers text generation model class.
  *
