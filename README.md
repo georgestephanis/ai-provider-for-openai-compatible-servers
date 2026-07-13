@@ -6,7 +6,7 @@ Once connected, any plugin or feature built on the WordPress AI Client can gener
 
 ## Try it in WordPress Playground
 
-[**Launch a live demo in WordPress Playground**](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/georgestephanis/ai-provider-for-openai-compatible-servers/trunk/blueprint.json) — spins up a throwaway WordPress site in your browser with the plugin installed and activated, landing directly on the Connectors settings screen. See [blueprint.json](blueprint.json).
+[**Launch a live demo in WordPress Playground**](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/georgestephanis/ai-provider-for-openai-compatible-servers/refs/heads/trunk/blueprint.json) — spins up a throwaway WordPress site in your browser with the plugin installed and activated, landing directly on the Connectors settings screen. See [blueprint.json](blueprint.json).
 
 To test a live connection from Playground you'll need an OpenAI-compatible endpoint reachable from your browser. A local server such as Ollama works if it allows cross-origin requests (e.g. `OLLAMA_ORIGINS=https://playground.wordpress.net`), since Playground routes WordPress's outbound HTTP through the browser.
 
