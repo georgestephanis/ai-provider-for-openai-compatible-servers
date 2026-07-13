@@ -4,33 +4,36 @@ Guidance for AI agents (and humans) working in this repository.
 
 ## What this is
 
-A WordPress plugin that registers a provider with the **WordPress AI Client** (`WordPress\AiClient`) so that any OpenAI-compatible inference server (Ollama, LM Studio, vLLM, llama.cpp, LocalAI, …) can be used as an AI backend. It also registers a custom setup card on the WordPress **Connectors** settings screen (`Settings → Connectors`, WP 6.9+ experimental API).
+A WordPress plugin that registers a provider with the **WordPress AI Client** (`WordPress\AiClient`, bundled in WP core since 7.0 under `wp-includes/php-ai-client/`) so that any OpenAI-compatible inference server (Ollama, LM Studio, vLLM, llama.cpp, LocalAI, …) can be used as an AI backend. It also registers a custom setup card on the WordPress **Connectors** settings screen (`Settings → Connectors`, WP 7.0 experimental API).
 
 ## Layout
 
 ```
 plugin.php                      Bootstrap: provider registration, settings, REST route,
                                 cache-flush hooks, http_request_args filter, script enqueue.
-src/autoload.php                Minimal PSR-4 autoloader for WordPress\OpenAiCompatibleServersProvider\.
-src/Provider/                   OpenAiCompatibleServersProvider — extends AbstractApiProvider
+includes/autoload.php           Minimal PSR-4 autoloader for WordPress\OpenAiCompatibleServersProvider\.
+includes/Provider/              OpenAiCompatibleServersProvider — extends AbstractApiProvider
                                 (from the AI Client SDK); base URL comes from an option.
-src/Metadata/                   Model metadata directory — lists models from GET {base}/models,
+includes/Metadata/              Model metadata directory — lists models from GET {base}/models,
                                 or builds metadata from the manual model list option.
-src/Models/                     Text generation model — extends
+includes/Models/                Text generation model — extends
                                 AbstractOpenAiCompatibleTextGenerationModel; injects custom
                                 headers, context-length overrides, thinking toggles, and the
                                 R1 system-prompt-folding behavior.
-assets/js/connector-ui.js       ES module (no build step) rendering the Connectors setup card.
-                                Registered with wp_register_script_module and a static import
-                                of @wordpress/connectors.
+src/connector-ui.js             JSX source for the Connectors setup card. Compiled by
+                                wp-scripts (see webpack.config.js / babel.config.js) into
+                                build/, which is what gets enqueued.
+build/                          Compiled script module + generated .asset.php (committed).
 assets/images/logo.svg          Provider logo.
+blueprint.json                  WordPress Playground blueprint (linked from README.md).
 readme.txt                      wp.org plugin directory readme.
 ```
 
 ## Key facts an agent should know before editing
 
-- **Two coding styles coexist.** `src/` follows the AI Client SDK's PSR-12 style (4-space indent, camelCase methods, `declare(strict_types=1)`). `plugin.php` is procedural, namespaced WordPress code. PHPCS here runs PSR-12 plus the WordPress **security, i18n, and escaping** sniffs — not full WPCS formatting. Match the style of the file you're in.
-- **No JS build step.** `connector-ui.js` is enqueued directly as a script module. Do not introduce JSX or npm-bundled imports without also adding a `wp-scripts build` pipeline and changing the enqueue. It uses `createElement` (`el`) on purpose.
+- **Two coding styles coexist.** `includes/` follows the AI Client SDK's PSR-12 style (4-space indent, camelCase methods, `declare(strict_types=1)`). `plugin.php` is procedural, namespaced WordPress code. PHPCS here runs PSR-12 plus the WordPress **security, i18n, and escaping** sniffs — not full WPCS formatting. Match the style of the file you're in.
+- **JS builds from src/ into build/.** Edit `src/connector-ui.js` (JSX), then run `npm run build`; never edit `build/` by hand. The build uses the classic JSX runtime with `createElement` from `window.wp.element` (see `babel.config.js`) because core provides no `react/jsx-runtime` script module — don't switch it to the automatic runtime. Everything bundles except `@wordpress/connectors`, which stays a static import resolved by core's script-modules import map (see `webpack.config.js`). Commit `build/` alongside source changes.
+- **Core masks connector API keys.** Every `/wp/v2/settings` REST response replaces connector API-key values with a mask like `••••fj39` (`_wp_connectors_mask_api_key()` in core). The JS must never send the mask to a server or save it back (see `isMaskedKey` in `handleSave`), and the `test-connection` REST handler substitutes the stored option when it receives a mask-prefixed key. Core also validates AI-provider keys server-side on save and blanks them if validation fails.
 - **Experimental APIs.** The UI depends on `@wordpress/connectors` `__experimentalRegisterConnector` / `__experimentalConnectorItem`. These can break between WordPress releases; when a WP upgrade breaks the settings card, look here first.
 - **Provider registration is defensive.** `plugin.php` no-ops if `WordPress\AiClient\AiClient` doesn't exist, so the plugin activates safely without the AI Client. Keep that guard.
 - **All nine settings** live in the `connectors` settings group with `show_in_rest => true`; the JS saves them through `saveEntityRecord('root', 'site', …)` (the `/wp/v2/settings` endpoint), so any new setting must be registered in PHP *and* wired into the JS temp-state/save/remove handlers.
@@ -46,6 +49,8 @@ composer install          # once
 composer lint             # phpcs
 composer format           # phpcbf auto-fix
 npm install               # once
+npm run build             # compile src/ (JSX) into build/
+npm run start             # build in watch mode
 npm run lint:js           # eslint via @wordpress/scripts
 npm run lint:css          # stylelint via @wordpress/scripts
 npm run plugin-zip        # package for distribution

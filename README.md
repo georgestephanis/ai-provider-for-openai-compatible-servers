@@ -4,6 +4,12 @@ Connect self-hosted, OpenAI-compatible inference servers — **Ollama, LM Studio
 
 Once connected, any plugin or feature built on the WordPress AI Client can generate text using your own models, on your own hardware, with no data leaving your network.
 
+## Try it in WordPress Playground
+
+[**Launch a live demo in WordPress Playground**](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/georgestephanis/ai-provider-for-openai-compatible-servers/trunk/blueprint.json) — spins up a throwaway WordPress site in your browser with the plugin installed and activated, landing directly on the Connectors settings screen. See [blueprint.json](blueprint.json).
+
+To test a live connection from Playground you'll need an OpenAI-compatible endpoint reachable from your browser. A local server such as Ollama works if it allows cross-origin requests (e.g. `OLLAMA_ORIGINS=https://playground.wordpress.net`), since Playground routes WordPress's outbound HTTP through the browser.
+
 ## Features
 
 - **Any OpenAI-compatible endpoint** — point it at `http://localhost:11434/v1` (Ollama's default) or any other base URL, local or remote.
@@ -17,7 +23,7 @@ Once connected, any plugin or feature built on the WordPress AI Client can gener
 
 ## Requirements
 
-- WordPress 6.9 or later (with the WordPress AI Client / Connectors available)
+- WordPress 7.0 or later (ships the WordPress AI Client and the Connectors settings screen)
 - PHP 7.4 or later
 - A running OpenAI-compatible inference server reachable from your WordPress host
 
@@ -52,12 +58,14 @@ npm install        # JS/CSS linting via @wordpress/scripts
 
 composer lint      # PHP coding standards check
 composer format    # Auto-fix PHP where possible
+npm run build      # Compile src/connector-ui.js (JSX) into build/
+npm run start      # Build in watch mode
 npm run lint:js    # ESLint (WordPress preset)
 npm run lint:css   # Stylelint (WordPress preset)
 npm run plugin-zip # Build a distributable zip
 ```
 
-There is no compile step — `assets/js/connector-ui.js` is shipped as an ES module and enqueued via `wp_register_script_module()`.
+The connector UI lives in `src/connector-ui.js` (JSX) and compiles via `wp-scripts build --experimental-modules` into `build/connector-ui.js`, which is enqueued as a script module via `wp_register_script_module()` using the generated asset file for dependencies and cache-busting. The built output is committed, so a checkout works without running the build — re-run `npm run build` after editing the source.
 
 See [AGENTS.md](AGENTS.md) for architecture notes and contributor/agent guidance.
 

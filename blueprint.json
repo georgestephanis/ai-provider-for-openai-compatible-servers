@@ -1,0 +1,29 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"meta": {
+		"title": "AI Provider for OpenAI Compatible Servers",
+		"description": "Try the OpenAI Compatible Servers connector on the WordPress Connectors settings screen.",
+		"author": "georgestephanis"
+	},
+	"preferredVersions": {
+		"php": "8.3",
+		"wp": "latest"
+	},
+	"features": {
+		"networking": true
+	},
+	"login": true,
+	"landingPage": "/wp-admin/options-connectors.php",
+	"steps": [
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "url",
+				"url": "https://github-proxy.com/proxy/?repo=georgestephanis/ai-provider-for-openai-compatible-servers&branch=trunk"
+			},
+			"options": {
+				"activate": true
+			}
+		}
+	]
+}

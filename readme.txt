@@ -28,7 +28,7 @@ Run AI features in WordPress against models on your own hardware. No third-party
 
 = Requirements =
 
-* The WordPress AI Client must be available (WordPress 6.9+).
+* The WordPress AI Client must be available (WordPress 7.0+).
 * A running OpenAI-compatible inference server reachable from your web server.
 
 == Installation ==
