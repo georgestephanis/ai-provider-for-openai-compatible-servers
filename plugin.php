@@ -26,6 +26,8 @@ if (!defined('ABSPATH')) {
     return;
 }
 
+const VERSION = '1.0.0';
+
 require_once __DIR__ . '/src/autoload.php';
 
 /**
@@ -458,7 +460,7 @@ function enqueue_connector_scripts(string $hook_suffix): void
                 'id'     => '@wordpress/connectors',
             ),
         ),
-        '1.0.0'
+        VERSION
     );
     wp_enqueue_script_module('openai-compatible-servers-connector-ui');
 }
