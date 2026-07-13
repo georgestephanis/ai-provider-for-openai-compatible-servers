@@ -24,7 +24,8 @@ src/connector-ui.js             JSX source for the Connectors setup card. Compil
                                 wp-scripts (see webpack.config.js / babel.config.js) into
                                 build/, which is what gets enqueued.
 build/                          Compiled script module + generated .asset.php (committed).
-assets/images/logo.svg          Provider logo.
+assets/images/logo.svg          Generic provider logo (fallback).
+assets/images/providers/        Brand icons for auto-detected backends (Ollama/vLLM/LM Studio).
 blueprint.json                  WordPress Playground blueprint (linked from README.md).
 readme.txt                      wp.org plugin directory readme.
 ```
@@ -40,6 +41,7 @@ readme.txt                      wp.org plugin directory readme.
 - **Option prefix** is `connectors_ai_openai_compatible_servers_`. Changing an option name is a breaking change for existing installs; add migration code if you must.
 - **Cache invalidation**: every `update_option_{setting}` hook calls `flush_models_cache()`. New settings that affect model listing need the same hook. (Note: `update_option_*` does not fire on first `add_option()` — known quirk.)
 - **SSRF surface**: the `openai-compatible-servers/v1/test-connection` REST route and the `http_request_args` filter deliberately set `reject_unsafe_urls = false` so local/LAN servers work. Any change here is security-sensitive: keep the `manage_options` permission callback, and don't widen the URL match.
+- **Provider detection is best-effort by design.** `detect_provider_type()` in `plugin.php` probes auxiliary, non-OpenAI-spec endpoints to guess which server is behind the configured base URL: Ollama's `GET {origin}/` (literal body `Ollama is running`), vLLM's `GET {origin}/version` (JSON `version` field), and LM Studio's `GET {origin}/api/v0/models` (JSON `data` array). None of these are guaranteed — a reverse proxy can mask any of them — so any probe failure (`WP_Error`, non-200, bad JSON) silently falls through to `null` rather than erroring; don't "fix" this into throwing or logging. The result rides along on the `test-connection` REST response as `provider`. Brand icons for a positive match live in `assets/images/providers/` (from LobeHub's MIT-licensed `lobe-icons`) and are resolved client-side in `src/connector-ui.js` via `new URL('../assets/images/providers/{slug}.svg', import.meta.url).href` — no PHP-to-JS data-passing needed since they're static build assets. Undetected servers keep the generic `assets/images/logo.svg`.
 - **Text domain** is `ai-provider-for-openai-compatible-servers` and must match the plugin directory name. Every `__()`/`sprintf(__())` in PHP *and* JS needs it.
 
 ## Commands

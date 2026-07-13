@@ -56,6 +56,11 @@ Yes. Enter any base URL reachable from your WordPress host. The plugin allows re
 
 No. Requests go only to the server base URL you configure.
 
+== Credits ==
+
+The Ollama, vLLM, and LM Studio brand icons shown when a server is detected are from
+[LobeHub's lobe-icons](https://github.com/lobehub/lobe-icons), used under the MIT license.
+
 == Changelog ==
 
 = 1.0.0 =

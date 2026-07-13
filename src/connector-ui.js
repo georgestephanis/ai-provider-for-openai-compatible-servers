@@ -36,6 +36,30 @@ const supportsImagesSettingName =
 const enableR1FormatSettingName =
 	'connectors_ai_openai_compatible_servers_enable_r1_format';
 
+// Brand icons for inference servers we can best-effort detect via the test-connection
+// probe (see detect_provider_type() in plugin.php). Resolved relative to this module's
+// own URL so no server-side data-passing is needed for static assets.
+const PROVIDER_ICONS = {
+	ollama: new URL(
+		/* webpackIgnore: true */ '../assets/images/providers/ollama.svg',
+		import.meta.url
+	).href,
+	vllm: new URL(
+		/* webpackIgnore: true */ '../assets/images/providers/vllm.svg',
+		import.meta.url
+	).href,
+	lmstudio: new URL(
+		/* webpackIgnore: true */ '../assets/images/providers/lmstudio.svg',
+		import.meta.url
+	).href,
+};
+
+const PROVIDER_NAMES = {
+	ollama: 'Ollama',
+	vllm: 'vLLM',
+	lmstudio: 'LM Studio',
+};
+
 /**
  * Clean badge component to show connection status.
  */
@@ -159,6 +183,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 	const [ availableModels, setAvailableModels ] = useState( [] );
 	const [ isTesting, setIsTesting ] = useState( false );
 	const [ testResult, setTestResult ] = useState( null );
+	const [ detectedProvider, setDetectedProvider ] = useState( null );
 	const [ hasInitialized, setHasInitialized ] = useState( false );
 	const [ hasModelsInitialized, setHasModelsInitialized ] = useState( false );
 
@@ -261,8 +286,10 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 					}
 					if ( data.success && Array.isArray( data.data ) ) {
 						setAvailableModels( data.data );
+						setDetectedProvider( data.provider || null );
 					} else {
 						setAvailableModels( [] );
+						setDetectedProvider( null );
 					}
 				} )
 				.catch( ( err ) => {
@@ -272,6 +299,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 					// eslint-disable-next-line no-console -- surface unexpected failures for debugging; no sensitive data logged.
 					console.warn( 'Failed to autodetect models:', err );
 					setAvailableModels( [] );
+					setDetectedProvider( null );
 				} );
 		}, 500 );
 
@@ -284,6 +312,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 	// Reset test result if connection parameters change.
 	useEffect( () => {
 		setTestResult( null );
+		setDetectedProvider( null );
 	}, [ tempBaseUrl, tempApiKey, tempHeaders ] );
 
 	// Autopopulate advanced settings based on availableModels and active selections.
@@ -389,6 +418,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 
 			if ( data.success && Array.isArray( data.data ) ) {
 				setAvailableModels( data.data );
+				setDetectedProvider( data.provider || null );
 
 				// If in manual mode and no models are selected yet, default to enabling all of them.
 				if (
@@ -400,32 +430,35 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 					setTempSelectedCheckboxModels( allModelIds );
 				}
 
+				const providerName = PROVIDER_NAMES[ data.provider ];
+				const successMessage = providerName
+					? sprintf(
+							/* translators: 1: number of models found, 2: detected provider name (e.g. Ollama) */
+							__(
+								'Connection successful! Detected %1$d model(s) via %2$s.',
+								'ai-provider-for-openai-compatible-servers'
+							),
+							data.data.length,
+							providerName
+					  )
+					: sprintf(
+							/* translators: %d: number of models found */
+							__(
+								'Connection successful! Detected %d model(s).',
+								'ai-provider-for-openai-compatible-servers'
+							),
+							data.data.length
+					  );
+
 				setTestResult( {
 					success: true,
-					message: sprintf(
-						/* translators: %d: number of models found */
-						__(
-							'Connection successful! Detected %d model(s).',
-							'ai-provider-for-openai-compatible-servers'
-						),
-						data.data.length
-					),
+					message: successMessage,
 				} );
 
-				createSuccessNotice(
-					sprintf(
-						/* translators: %d: number of models found */
-						__(
-							'Connection successful! Detected %d model(s).',
-							'ai-provider-for-openai-compatible-servers'
-						),
-						data.data.length
-					),
-					{
-						id: 'openai-compatible-servers-test-success',
-						type: 'snackbar',
-					}
-				);
+				createSuccessNotice( successMessage, {
+					id: 'openai-compatible-servers-test-success',
+					type: 'snackbar',
+				} );
 			} else {
 				throw new Error(
 					data.message ||
@@ -608,9 +641,13 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 		}
 	};
 
+	// Swap in the detected server's brand icon when we have one; otherwise fall back
+	// to the generic logo registered by the provider metadata.
+	const resolvedLogo = PROVIDER_ICONS[ detectedProvider ] || logo;
+
 	return (
 		<ConnectorItem
-			logo={ logo }
+			logo={ resolvedLogo }
 			name={ name }
 			description={ description }
 			actionArea={

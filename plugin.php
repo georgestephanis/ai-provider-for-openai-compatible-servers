@@ -398,6 +398,65 @@ function is_valid_http_header_value(string $value): bool
 }
 
 /**
+ * Best-effort detection of the inference server type behind a base URL.
+ *
+ * None of these signals are part of the OpenAI-compatible spec, so any of them can be
+ * missing or masked behind a reverse proxy — an unmatched result is a normal outcome,
+ * not an error. Assumes the caller has already allowed local requests to this origin.
+ *
+ * @since 1.0.0
+ *
+ * @param string $base_url Configured base URL (e.g. http://localhost:11434/v1).
+ * @param array  $headers  HTTP headers to send with each probe (auth, custom headers).
+ * @return string|null One of 'ollama', 'vllm', 'lmstudio', or null if undetected.
+ */
+function detect_provider_type(string $base_url, array $headers): ?string
+{
+    $parts = wp_parse_url($base_url);
+    if (!$parts || empty($parts['host'])) {
+        return null;
+    }
+
+    $origin = ($parts['scheme'] ?? 'http') . '://' . $parts['host'];
+    if (!empty($parts['port'])) {
+        $origin .= ':' . $parts['port'];
+    }
+
+    $probe_args = array(
+        'headers'     => $headers,
+        'timeout'     => 3,
+        'redirection' => 0,
+    );
+
+    $ollama = wp_remote_get($origin . '/', $probe_args);
+    if (
+        !is_wp_error($ollama)
+        && 200 === wp_remote_retrieve_response_code($ollama)
+        && 'Ollama is running' === trim(wp_remote_retrieve_body($ollama))
+    ) {
+        return 'ollama';
+    }
+
+    $vllm = wp_remote_get($origin . '/version', $probe_args);
+    if (!is_wp_error($vllm) && 200 === wp_remote_retrieve_response_code($vllm)) {
+        $vllm_data = json_decode(wp_remote_retrieve_body($vllm), true);
+        if (is_array($vllm_data) && isset($vllm_data['version']) && is_string($vllm_data['version'])) {
+            return 'vllm';
+        }
+    }
+
+    $lmstudio = wp_remote_get($origin . '/api/v0/models', $probe_args);
+    if (!is_wp_error($lmstudio) && 200 === wp_remote_retrieve_response_code($lmstudio)) {
+        $lmstudio_data = json_decode(wp_remote_retrieve_body($lmstudio), true);
+        if (is_array($lmstudio_data) && isset($lmstudio_data['data']) && is_array($lmstudio_data['data'])) {
+            return 'lmstudio';
+        }
+    }
+
+    return null;
+}
+
+/**
  * Handle connection test REST API request.
  *
  * @since 1.0.0
@@ -466,47 +525,53 @@ function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Respon
     };
     add_filter('http_request_args', $allow_local_filter, 10, 2);
 
-    $response = wp_remote_get($clean_url, array(
-        'headers'    => $headers,
-        'timeout'    => 15,
-        'redirection' => 0,
-    ));
+    try {
+        $response = wp_remote_get($clean_url, array(
+            'headers'    => $headers,
+            'timeout'    => 15,
+            'redirection' => 0,
+        ));
 
-    remove_filter('http_request_args', $allow_local_filter);
+        if (is_wp_error($response)) {
+            return new \WP_REST_Response(array(
+                'success' => false,
+                'message' => $response->get_error_message(),
+            ), 200);
+        }
 
-    if (is_wp_error($response)) {
+        $code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+
+        if ($code < 200 || $code >= 300) {
+            return new \WP_REST_Response(array(
+                'success' => false,
+                'message' => sprintf(
+                    /* translators: %d: HTTP status code */
+                    __('Server returned status %d.', 'ai-provider-for-openai-compatible-servers'),
+                    $code
+                ),
+            ), 200);
+        }
+
+        $data = json_decode($body, true);
+        if (!is_array($data) || !isset($data['data'])) {
+            return new \WP_REST_Response(array(
+                'success' => false,
+                'message' => __(
+                    'Invalid JSON response from server /models endpoint.',
+                    'ai-provider-for-openai-compatible-servers'
+                ),
+            ), 200);
+        }
+
         return new \WP_REST_Response(array(
-            'success' => false,
-            'message' => $response->get_error_message(),
+            'success'  => true,
+            'data'     => $data['data'],
+            'provider' => detect_provider_type($base_url, $headers),
         ), 200);
+    } finally {
+        remove_filter('http_request_args', $allow_local_filter);
     }
-
-    $code = wp_remote_retrieve_response_code($response);
-    $body = wp_remote_retrieve_body($response);
-
-    if ($code < 200 || $code >= 300) {
-        return new \WP_REST_Response(array(
-            'success' => false,
-            /* translators: %d: HTTP status code */
-            'message' => sprintf(__('Server returned status %d.', 'ai-provider-for-openai-compatible-servers'), $code),
-        ), 200);
-    }
-
-    $data = json_decode($body, true);
-    if (!is_array($data) || !isset($data['data'])) {
-        return new \WP_REST_Response(array(
-            'success' => false,
-            'message' => __(
-                'Invalid JSON response from server /models endpoint.',
-                'ai-provider-for-openai-compatible-servers'
-            ),
-        ), 200);
-    }
-
-    return new \WP_REST_Response(array(
-        'success' => true,
-        'data'    => $data['data'],
-    ), 200);
 }
 
 /**

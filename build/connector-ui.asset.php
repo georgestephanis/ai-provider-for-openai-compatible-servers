@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('@wordpress/connectors'), 'version' => 'ec673aeb833a8433f6b2', 'type' => 'module');
+<?php return array('dependencies' => array('@wordpress/connectors'), 'version' => '10769fb463c33dab44b7', 'type' => 'module');
