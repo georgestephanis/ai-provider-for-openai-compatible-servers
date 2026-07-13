@@ -24,7 +24,7 @@ Issues flagged during the 2026-07-13 code review, roughly in priority order. Che
 
 ## 🟢 Cleanup / polish
 
-- [ ] **Add `uninstall.php`** deleting all nine `connectors_ai_openai_compatible_servers_*` options.
+- [x] **Add `uninstall.php`** deleting all nine `connectors_ai_openai_compatible_servers_*` options.
 - [ ] **Experimental API dependency.** The UI relies on `__experimentalRegisterConnector` / `__experimentalConnectorItem` from `@wordpress/connectors` — expect churn across WP releases; re-verify on each core update.
 - [ ] **JS lint pass.** `npm run lint:js` currently reports ~665 errors: mostly Prettier tabs-vs-spaces (auto-fixable via `npm run lint:js:fix`), plus real items — `no-console` statements, two `__()` calls missing the text domain (`'Checking…'`, `'Cancel'`, `'Edit'`, `'Set up'` around line 474), missing translator comments for `sprintf`-style strings, unused `plugin` prop and `isFetchingModels`, and two `react-hooks/exhaustive-deps` warnings.
 - [ ] **PHP lint pass.** `composer lint` reports 44 errors / 23 warnings: 43 auto-fixable via `composer format`; real items are one unescaped exception message (`WordPress.Security.EscapeOutput.ExceptionNotEscaped` in `src/Provider/OpenAiCompatibleServersProvider.php`), one missing translators comment in `plugin.php`, and long-line warnings.

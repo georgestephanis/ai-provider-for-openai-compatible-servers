@@ -6,6 +6,7 @@
   "private": true,
   "files": [
     "plugin.php",
+    "uninstall.php",
     "readme.txt",
     "src/**",
     "assets/**"
