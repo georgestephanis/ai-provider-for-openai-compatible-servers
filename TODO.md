@@ -14,7 +14,7 @@ Issues flagged during the 2026-07-13 code review, roughly in priority order. Che
 - [x] **Model cache not flushed on first save.** The `update_option_{option}` hooks in `plugin.php` don't fire when an option is first created (`add_option`). Add matching `add_option_{option}` hooks, or hook `updated_option`/`added_option` generically.
 - [x] **API-key field read via `document.getElementById()` hack.** `handleTestCredentials` and `handleSave` in `connector-ui.js` read the input's DOM value instead of the `tempApiKey` React state — that's masking a state-sync bug. Fix the state handling and drop the DOM reads.
 - [x] **No debounce on model autodetection.** The `useEffect` watching `tempBaseUrl`/`tempApiKey` fires a REST request (which triggers a server-side HTTP request) on *every keystroke*. Debounce it (~500ms) or fetch only on blur / "Test Credentials".
-- [ ] **Mangled plugin header.** `plugin.php` header block had a garbled description and comment structure (partially cleaned up already). Verify the full docblock: `Plugin URI` points to `github.com/WordPress/ai-provider-for-openai-compatible-servers`, which may not exist; `Author: Antigravity` — confirm intended author/URI.
+- [x] **Mangled plugin header.** `plugin.php` header block had a garbled description and comment structure (partially cleaned up already). Verify the full docblock: `Plugin URI` points to `github.com/WordPress/ai-provider-for-openai-compatible-servers`, which may not exist; `Author: Antigravity` — confirm intended author/URI.
 
 ## 🟡 Security hardening (functional as-is, but tighten)
 
