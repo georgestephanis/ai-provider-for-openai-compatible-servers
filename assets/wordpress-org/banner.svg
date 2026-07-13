@@ -1,12 +1,12 @@
 <svg width="772" height="250" viewBox="0 0 772 250" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="772" height="250" fill="url(#banner_grad)" />
-  <g transform="translate(64, 65)">
-    <path d="M28 0H92C98.6 0 104 5.4 104 12V108C104 114.6 98.6 120 92 120H28C21.4 120 16 114.6 16 108V12C16 5.4 21.4 0 28 0Z" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linejoin="round" />
-    <rect x="37" y="37" width="46" height="46" rx="7" fill="white" fill-opacity="0.95" />
-    <path d="M60 -21V0" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linecap="round" />
-    <path d="M60 120V141" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linecap="round" />
-    <path d="M-21 60H0" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linecap="round" />
-    <path d="M120 60H141" stroke="white" stroke-opacity="0.9" stroke-width="7" stroke-linecap="round" />
+  <g transform="translate(124, 125) scale(0.75) translate(-128, -128)">
+    <path d="M76 64H180C186.6 64 192 69.4 192 76V180C192 186.6 186.6 192 180 192H76C69.4 192 64 186.6 64 180V76C64 69.4 69.4 64 76 64Z" stroke="white" stroke-opacity="0.9" stroke-width="12" stroke-linejoin="round" />
+    <rect x="96" y="96" width="64" height="64" rx="12" fill="white" fill-opacity="0.95" />
+    <path d="M128 42V64" stroke="white" stroke-opacity="0.9" stroke-width="12" stroke-linecap="round" />
+    <path d="M128 192V214" stroke="white" stroke-opacity="0.9" stroke-width="12" stroke-linecap="round" />
+    <path d="M42 128H64" stroke="white" stroke-opacity="0.9" stroke-width="12" stroke-linecap="round" />
+    <path d="M192 128H214" stroke="white" stroke-opacity="0.9" stroke-width="12" stroke-linecap="round" />
   </g>
   <text x="240" y="120" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="30" font-weight="700" fill="#ffffff">OpenAI Compatible Servers</text>
   <text x="240" y="150" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" fill-opacity="0.85">Ollama &#183; vLLM &#183; LM Studio &#183; llama.cpp &#183; LocalAI</text>
