@@ -1,0 +1,24 @@
+{
+  "name": "ai-provider-for-openai-compatible-servers",
+  "version": "1.0.0",
+  "description": "AI provider to use local OpenAI-compatible servers (Ollama, LM Studio, vLLM, etc.) with the WordPress AI Client.",
+  "license": "GPL-2.0-or-later",
+  "private": true,
+  "files": [
+    "plugin.php",
+    "readme.txt",
+    "src/**",
+    "assets/**"
+  ],
+  "scripts": {
+    "lint:js": "wp-scripts lint-js assets/js",
+    "lint:js:fix": "wp-scripts lint-js assets/js --fix",
+    "lint:css": "wp-scripts lint-style 'assets/**/*.css' --allow-empty-input",
+    "format": "wp-scripts format assets/js",
+    "plugin-zip": "wp-scripts plugin-zip"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^30.0.0",
+    "typescript": "5.8.3"
+  }
+}

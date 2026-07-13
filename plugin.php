@@ -1,0 +1,384 @@
+<?php
+/**
+ * Plugin Name: AI Provider for OpenAI Compatible Servers
+ * Plugin URI: https://github.com/WordPress/ai-provider-for-openai-compatible-servers
+ * Description: Clean, lean provider to run local OpenAI-compatible servers (LM Studio, Ollama, vLLM, etc.) with the WordPress AI Client.
+ * Requires at least: 6.9
+ * Requires PHP: 7.4
+ * Version: 1.0.0
+ * Author: Antigravity
+ * Author URI: https://make.wordpress.org/ai/
+ * License: GPL-2.0-or-later
+ * License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
+ * Text Domain: ai-provider-for-openai-compatible-servers
+ *
+ * @package WordPress\OpenAiCompatibleServersProvider
+ */
+
+declare(strict_types=1);
+
+namespace WordPress\OpenAiCompatibleServersProvider;
+
+use WordPress\AiClient\AiClient;
+use WordPress\OpenAiCompatibleServersProvider\Provider\OpenAiCompatibleServersProvider;
+
+if (!defined('ABSPATH')) {
+    return;
+}
+
+require_once __DIR__ . '/src/autoload.php';
+
+/**
+ * Registers the OpenAI Compatible Servers provider with the AI Client.
+ *
+ * @since 1.0.0
+ *
+ * @return void
+ */
+function register_provider(): void
+{
+    if (!class_exists(AiClient::class)) {
+        return;
+    }
+
+    $registry = AiClient::defaultRegistry();
+
+    if ($registry->hasProvider(OpenAiCompatibleServersProvider::class)) {
+        return;
+    }
+
+    $registry->registerProvider(OpenAiCompatibleServersProvider::class);
+}
+add_action('init', __NAMESPACE__ . '\\register_provider', 5);
+
+/**
+ * Registers settings for the OpenAI Compatible Servers connector.
+ *
+ * @since 1.0.0
+ *
+ * @return void
+ */
+function register_settings(): void
+{
+    // API Key setting.
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_api_key',
+        array(
+            'type'              => 'string',
+            'label'             => __( 'OpenAI Compatible Servers API Key', 'ai-provider-for-openai-compatible-servers' ),
+            'description'       => __( 'API key for the OpenAI Compatible Servers connector.', 'ai-provider-for-openai-compatible-servers' ),
+            'default'           => '',
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+
+    // Base URL setting.
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_base_url',
+        array(
+            'type'              => 'string',
+            'label'             => __( 'OpenAI Compatible Servers Base URL', 'ai-provider-for-openai-compatible-servers' ),
+            'description'       => __( 'Base URL for the OpenAI Compatible Servers connector.', 'ai-provider-for-openai-compatible-servers' ),
+            'default'           => 'http://localhost:11434/v1',
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+
+    // Model mode setting (autodetect or manual).
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_model_mode',
+        array(
+            'type'              => 'string',
+            'label'             => __( 'Model Selection Mode', 'ai-provider-for-openai-compatible-servers' ),
+            'description'       => __( 'Model selection mode (autodetect or manual).', 'ai-provider-for-openai-compatible-servers' ),
+            'default'           => 'autodetect',
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+
+    // Manual models listing setting (comma-separated list of models).
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_models',
+        array(
+            'type'              => 'string',
+            'label'             => __( 'Manual Model List', 'ai-provider-for-openai-compatible-servers' ),
+            'description'       => __( 'List of manually specified models.', 'ai-provider-for-openai-compatible-servers' ),
+            'default'           => '',
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+
+    // Context length setting.
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_context_length',
+        array(
+            'type'              => 'integer',
+            'label'             => __( 'Context Length', 'ai-provider-for-openai-compatible-servers' ),
+            'description'       => __( 'Maximum context length in tokens.', 'ai-provider-for-openai-compatible-servers' ),
+            'default'           => 0,
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'absint',
+        )
+    );
+
+    // Disable thinking setting.
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_disable_thinking',
+        array(
+            'type'              => 'boolean',
+            'label'             => __( 'Disable Thinking', 'ai-provider-for-openai-compatible-servers' ),
+            'description'       => __( 'Disable thinking/reasoning blocks on thinking models.', 'ai-provider-for-openai-compatible-servers' ),
+            'default'           => false,
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'rest_sanitize_boolean',
+        )
+    );
+
+    // Custom HTTP headers (JSON string).
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_headers',
+        array(
+            'type'              => 'string',
+            'label'             => __( 'Custom HTTP Headers', 'ai-provider-for-openai-compatible-servers' ),
+            'description'       => __( 'Custom headers to pass with each request.', 'ai-provider-for-openai-compatible-servers' ),
+            'default'           => '[]',
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+
+    // Supports images / multimodal capabilities.
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_supports_images',
+        array(
+            'type'              => 'boolean',
+            'label'             => __( 'Supports Images', 'ai-provider-for-openai-compatible-servers' ),
+            'description'       => __( 'Toggle image/multimodal support on the model.', 'ai-provider-for-openai-compatible-servers' ),
+            'default'           => false,
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'rest_sanitize_boolean',
+        )
+    );
+
+    // Enable DeepSeek R1 system prompt folding format.
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_enable_r1_format',
+        array(
+            'type'              => 'boolean',
+            'label'             => __( 'Enable R1 Message Format', 'ai-provider-for-openai-compatible-servers' ),
+            'description'       => __( 'Enables message folding for R1 reasoning compatibility.', 'ai-provider-for-openai-compatible-servers' ),
+            'default'           => false,
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'rest_sanitize_boolean',
+        )
+    );
+}
+add_action('init', __NAMESPACE__ . '\\register_settings', 10);
+
+/**
+ * Flush models cache on settings changes.
+ *
+ * @since 1.0.0
+ *
+ * @return void
+ */
+function flush_models_cache(): void
+{
+    try {
+        if (!class_exists(AiClient::class)) {
+            return;
+        }
+        $provider = AiClient::defaultRegistry()->getProvider('openai-compatible-servers');
+        if ($provider) {
+            $directory = $provider::modelMetadataDirectory();
+            if (method_exists($directory, 'invalidateCaches')) {
+                $directory->invalidateCaches();
+            }
+        }
+    } catch (\Throwable $e) {
+        // Fail silently.
+    }
+}
+add_action('update_option_connectors_ai_openai_compatible_servers_base_url', __NAMESPACE__ . '\\flush_models_cache');
+add_action('update_option_connectors_ai_openai_compatible_servers_api_key', __NAMESPACE__ . '\\flush_models_cache');
+add_action('update_option_connectors_ai_openai_compatible_servers_model_mode', __NAMESPACE__ . '\\flush_models_cache');
+add_action('update_option_connectors_ai_openai_compatible_servers_models', __NAMESPACE__ . '\\flush_models_cache');
+add_action('update_option_connectors_ai_openai_compatible_servers_context_length', __NAMESPACE__ . '\\flush_models_cache');
+add_action('update_option_connectors_ai_openai_compatible_servers_disable_thinking', __NAMESPACE__ . '\\flush_models_cache');
+add_action('update_option_connectors_ai_openai_compatible_servers_headers', __NAMESPACE__ . '\\flush_models_cache');
+add_action('update_option_connectors_ai_openai_compatible_servers_supports_images', __NAMESPACE__ . '\\flush_models_cache');
+add_action('update_option_connectors_ai_openai_compatible_servers_enable_r1_format', __NAMESPACE__ . '\\flush_models_cache');
+
+/**
+ * Filter HTTP request arguments to allow local server connections.
+ *
+ * @since 1.0.0
+ *
+ * @param array  $args Request arguments.
+ * @param string $url  Request URL.
+ * @return array Modified request arguments.
+ */
+function allow_local_requests_for_our_connector(array $args, string $url): array
+{
+    $base_url = get_option('connectors_ai_openai_compatible_servers_base_url');
+    if ($base_url && strpos($url, rtrim($base_url, '/')) === 0) {
+        $args['reject_unsafe_urls'] = false;
+    }
+    return $args;
+}
+add_filter('http_request_args', __NAMESPACE__ . '\\allow_local_requests_for_our_connector', 10, 2);
+
+/**
+ * Register custom REST API routes for connection tests.
+ *
+ * @since 1.0.0
+ *
+ * @return void
+ */
+function register_rest_routes(): void
+{
+    register_rest_route(
+        'openai-compatible-servers/v1',
+        '/test-connection',
+        array(
+            'methods'             => 'POST',
+            'callback'            => __NAMESPACE__ . '\\handle_test_connection_rest',
+            'permission_callback' => function () {
+                return current_user_can('manage_options');
+            },
+        )
+    );
+}
+add_action('rest_api_init', __NAMESPACE__ . '\\register_rest_routes');
+
+/**
+ * Handle connection test REST API request.
+ *
+ * @since 1.0.0
+ *
+ * @param \WP_REST_Request $request The REST request.
+ * @return \WP_REST_Response The REST response.
+ */
+function handle_test_connection_rest(\WP_REST_Request $request): \WP_REST_Response
+{
+    $params = $request->get_json_params();
+    $base_url = isset($params['base_url']) ? sanitize_text_field($params['base_url']) : '';
+    $api_key = isset($params['api_key']) ? sanitize_text_field($params['api_key']) : '';
+    $custom_headers = isset($params['headers']) ? $params['headers'] : array();
+
+    if (empty($base_url)) {
+        return new \WP_REST_Response(array('success' => false, 'message' => __('Base URL is required.', 'ai-provider-for-openai-compatible-servers')), 400);
+    }
+
+    $clean_url = rtrim($base_url, '/') . '/models';
+
+    $headers = array(
+        'Content-Type' => 'application/json',
+    );
+    if (!empty($api_key)) {
+        $headers['Authorization'] = 'Bearer ' . $api_key;
+    }
+
+    // Merge custom headers.
+    if (is_array($custom_headers)) {
+        foreach ($custom_headers as $header) {
+            if (isset($header['key']) && isset($header['value']) && '' !== trim($header['key'])) {
+                $headers[$header['key']] = $header['value'];
+            }
+        }
+    }
+
+    // Temporarily add filter to allow local request target if it matches our base URL.
+    $allow_local_filter = function(array $args, string $url) use ($base_url) {
+        if (strpos($url, rtrim($base_url, '/')) === 0) {
+            $args['reject_unsafe_urls'] = false;
+        }
+        return $args;
+    };
+    add_filter('http_request_args', $allow_local_filter, 10, 2);
+
+    $response = wp_remote_get($clean_url, array(
+        'headers' => $headers,
+        'timeout' => 15,
+    ));
+
+    remove_filter('http_request_args', $allow_local_filter);
+
+    if (is_wp_error($response)) {
+        return new \WP_REST_Response(array(
+            'success' => false,
+            'message' => $response->get_error_message(),
+        ), 200);
+    }
+
+    $code = wp_remote_retrieve_response_code($response);
+    $body = wp_remote_retrieve_body($response);
+
+    if ($code < 200 || $code >= 300) {
+        return new \WP_REST_Response(array(
+            'success' => false,
+            'message' => sprintf(__('Server returned status %d. Response: %s', 'ai-provider-for-openai-compatible-servers'), $code, substr($body, 0, 200)),
+        ), 200);
+    }
+
+    $data = json_decode($body, true);
+    if (!is_array($data) || !isset($data['data'])) {
+        return new \WP_REST_Response(array(
+            'success' => false,
+            'message' => __('Invalid JSON response from server /models endpoint.', 'ai-provider-for-openai-compatible-servers'),
+        ), 200);
+    }
+
+    return new \WP_REST_Response(array(
+        'success' => true,
+        'data'    => $data['data'],
+    ), 200);
+}
+
+/**
+ * Enqueues scripts and styles for the Connectors settings page.
+ *
+ * @since 1.0.0
+ *
+ * @param string $hook_suffix The current admin page hook.
+ * @return void
+ */
+function enqueue_connector_scripts(string $hook_suffix): void
+{
+    $current_screen = get_current_screen();
+    $is_connectors_page = (
+        (isset($_GET['page']) && 'options-connectors-wp-admin' === $_GET['page']) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        ($current_screen && 'options-connectors' === $current_screen->id)
+    );
+
+    if (!$is_connectors_page) {
+        return;
+    }
+
+    wp_register_script_module(
+        'openai-compatible-servers-connector-ui',
+        plugin_dir_url(__FILE__) . 'assets/js/connector-ui.js',
+        array(
+            array(
+                'import' => 'static',
+                'id'     => '@wordpress/connectors',
+            ),
+        ),
+        '1.0.0'
+    );
+    wp_enqueue_script_module('openai-compatible-servers-connector-ui');
+}
+add_action('admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue_connector_scripts');

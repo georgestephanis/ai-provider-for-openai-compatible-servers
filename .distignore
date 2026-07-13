@@ -1,0 +1,20 @@
+# Files and directories excluded from distribution zips (wp-cli dist-archive / wp.org SVN).
+.DS_Store
+.distignore
+.gitignore
+.git
+.github
+.idea
+.vscode
+node_modules
+vendor
+scratch
+conversation-log.jsonl
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpcs.xml.dist
+AGENTS.md
+README.md
+*.zip

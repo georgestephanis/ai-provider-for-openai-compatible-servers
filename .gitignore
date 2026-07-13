@@ -1,0 +1,15 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# Local-only working files — never commit these.
+/scratch/
+conversation-log.jsonl
+
+# Build artifacts
+*.zip
+
+# Editor/OS noise
+.DS_Store
+.idea/
+.vscode/

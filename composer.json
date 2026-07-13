@@ -1,0 +1,24 @@
+{
+    "name": "wordpress/ai-provider-for-openai-compatible-servers",
+    "description": "AI provider to use local OpenAI-compatible servers (Ollama, LM Studio, vLLM, etc.) with the WordPress AI Client.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "wp-coding-standards/wpcs": "^3.1",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "squizlabs/php_codesniffer": "^3.10"
+    },
+    "scripts": {
+        "lint": "phpcs",
+        "format": "phpcbf"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
