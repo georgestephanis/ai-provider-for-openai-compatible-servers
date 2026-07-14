@@ -97,6 +97,47 @@ class OpenAiCompatibleServersTextGenerationModel extends AbstractOpenAiCompatibl
                 ];
             }
 
+            // Normalize `response_format` structure for OpenAI-compatibility.
+            // If the client sent the raw JSON schema directly inside `json_schema` instead
+            // of wrapping it in `schema` and specifying a `name` parameter, wrap it properly.
+            if (isset($data['response_format']) && is_array($data['response_format'])) {
+                if (isset($data['response_format']['type']) && 'json_schema' === $data['response_format']['type']) {
+                    if (
+                        isset($data['response_format']['json_schema'])
+                        && is_array($data['response_format']['json_schema'])
+                    ) {
+                        $json_schema = $data['response_format']['json_schema'];
+                        if (!isset($json_schema['schema']) && isset($json_schema['type'])) {
+                            $name = isset($json_schema['name']) ? $json_schema['name'] : 'response_schema';
+                            $name = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name);
+                            if (strlen($name) > 64) {
+                                $name = substr($name, 0, 64);
+                            }
+                            if ('' === $name) {
+                                $name = 'response_schema';
+                            }
+
+                            $schema = $json_schema;
+                            unset($schema['name'], $schema['strict'], $schema['description']);
+
+                            $normalized_schema = [
+                                'name'   => $name,
+                                'schema' => $schema,
+                            ];
+
+                            if (isset($json_schema['strict'])) {
+                                $normalized_schema['strict'] = (bool) $json_schema['strict'];
+                            }
+                            if (isset($json_schema['description'])) {
+                                $normalized_schema['description'] = (string) $json_schema['description'];
+                            }
+
+                            $data['response_format']['json_schema'] = $normalized_schema;
+                        }
+                    }
+                }
+            }
+
             /**
              * Filters the completions request data before it is sent to the inference server.
              *
