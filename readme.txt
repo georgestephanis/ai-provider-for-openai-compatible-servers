@@ -21,6 +21,7 @@ Run AI features in WordPress against models on your own hardware. No third-party
 * Connect to any OpenAI-compatible base URL, local or remote (defaults to Ollama's `http://localhost:11434/v1`).
 * Autodetect available models from the server's `/models` endpoint, or specify models manually.
 * Setup card on the Connectors settings screen with a one-click connection test.
+* Best-effort detection of the running backend (Ollama, vLLM, or LM Studio), swapping in the brand's name and icon on the connector card once detected.
 * Optional API key (bearer token) for servers that require authentication.
 * Custom HTTP headers for reverse proxies and gateways.
 * Advanced options for reasoning models: disable thinking blocks, and an R1-style message format that folds the system prompt into the first user message (needed for DeepSeek-R1).

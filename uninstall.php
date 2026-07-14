@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Uninstall handler: removes all options created by this plugin.
  *
@@ -25,6 +26,7 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
         'connectors_ai_openai_compatible_servers_headers',
         'connectors_ai_openai_compatible_servers_supports_images',
         'connectors_ai_openai_compatible_servers_enable_r1_format',
+        'connectors_ai_openai_compatible_servers_detected_provider',
     );
 
     foreach ($option_names as $option_name) {
