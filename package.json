@@ -11,7 +11,9 @@
     "includes/**",
     "src/**",
     "build/**",
-    "assets/**"
+    "assets/**",
+    "!.DS_Store",
+    "!assets/wordpress-org/**"
   ],
   "scripts": {
     "build": "wp-scripts build --experimental-modules",
