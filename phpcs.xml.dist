@@ -2,7 +2,7 @@
 <ruleset name="AI Provider for OpenAI Compatible Servers">
     <description>PSR-12 formatting (matching the WordPress AI Client SDK style) plus WordPress security, i18n, and escaping sniffs.</description>
 
-    <file>plugin.php</file>
+    <file>ai-provider-for-openai-compatible-servers.php</file>
     <file>includes</file>
 
     <exclude-pattern>*/vendor/*</exclude-pattern>
