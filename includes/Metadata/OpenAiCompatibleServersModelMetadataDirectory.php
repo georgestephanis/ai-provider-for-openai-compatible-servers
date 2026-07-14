@@ -16,6 +16,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+use WordPress\AiClient\Messages\Enums\ModalityEnum;
 use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\DTO\Response;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
@@ -82,12 +83,16 @@ class OpenAiCompatibleServersModelMetadataDirectory extends AbstractOpenAiCompat
                     new SupportedOption(OptionEnum::outputSchema()),
                     new SupportedOption(OptionEnum::functionDeclarations()),
                     new SupportedOption(OptionEnum::customOptions()),
+                    new SupportedOption(OptionEnum::outputModalities(), [[ModalityEnum::text()]]),
                 ];
 
                 if ((bool) get_option('connectors_ai_openai_compatible_servers_supports_images', false)) {
-                    $options[] = new SupportedOption(OptionEnum::inputModalities(), ['text', 'image']);
+                    $options[] = new SupportedOption(OptionEnum::inputModalities(), [
+                        [ModalityEnum::text()],
+                        [ModalityEnum::text(), ModalityEnum::image()],
+                    ]);
                 } else {
-                    $options[] = new SupportedOption(OptionEnum::inputModalities(), ['text']);
+                    $options[] = new SupportedOption(OptionEnum::inputModalities(), [[ModalityEnum::text()]]);
                 }
 
                 foreach ($manual_models as $model_id) {
@@ -136,12 +141,16 @@ class OpenAiCompatibleServersModelMetadataDirectory extends AbstractOpenAiCompat
             new SupportedOption(OptionEnum::outputSchema()),
             new SupportedOption(OptionEnum::functionDeclarations()),
             new SupportedOption(OptionEnum::customOptions()),
+            new SupportedOption(OptionEnum::outputModalities(), [[ModalityEnum::text()]]),
         ];
 
         if ((bool) get_option('connectors_ai_openai_compatible_servers_supports_images', false)) {
-            $options[] = new SupportedOption(OptionEnum::inputModalities(), ['text', 'image']);
+            $options[] = new SupportedOption(OptionEnum::inputModalities(), [
+                [ModalityEnum::text()],
+                [ModalityEnum::text(), ModalityEnum::image()],
+            ]);
         } else {
-            $options[] = new SupportedOption(OptionEnum::inputModalities(), ['text']);
+            $options[] = new SupportedOption(OptionEnum::inputModalities(), [[ModalityEnum::text()]]);
         }
 
         $models = [];
