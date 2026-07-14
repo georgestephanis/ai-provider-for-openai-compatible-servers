@@ -17,6 +17,7 @@ if (!defined('ABSPATH')) {
 }
 
 use WordPress\AiClient\Providers\Http\DTO\Request;
+use WordPress\AiClient\Providers\Http\DTO\RequestOptions;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCompatibleTextGenerationModel;
 use WordPress\OpenAiCompatibleServersProvider\Provider\OpenAiCompatibleServersProvider;
@@ -75,6 +76,21 @@ class OpenAiCompatibleServersTextGenerationModel extends AbstractOpenAiCompatibl
             if ($disable_thinking) {
                 $data['thinking'] = false;
                 $data['reasoning_effort'] = 'low';
+                $data['chat_template_kwargs'] = [
+                    'enable_thinking' => false,
+                ];
+            }
+        }
+
+        $request_options = $this->getRequestOptions();
+        if (null === $request_options) {
+            $request_options = new RequestOptions();
+            $request_options->setTimeout(120.0);
+            $this->setRequestOptions($request_options);
+        } else {
+            $timeout = $request_options->getTimeout();
+            if (null === $timeout || $timeout < 120.0) {
+                $request_options->setTimeout(120.0);
             }
         }
 
@@ -83,7 +99,7 @@ class OpenAiCompatibleServersTextGenerationModel extends AbstractOpenAiCompatibl
             OpenAiCompatibleServersProvider::url($path),
             $headers,
             $data,
-            $this->getRequestOptions()
+            $request_options
         );
     }
 
