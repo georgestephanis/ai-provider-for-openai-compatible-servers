@@ -60,6 +60,21 @@ const PROVIDER_NAMES = {
 	lmstudio: 'LM Studio',
 };
 
+const PROVIDER_DESCRIPTIONS = {
+	ollama: __(
+		'Ollama server (OpenAI-compatible).',
+		'ai-provider-for-openai-compatible-servers'
+	),
+	vllm: __(
+		'vLLM server (OpenAI-compatible).',
+		'ai-provider-for-openai-compatible-servers'
+	),
+	lmstudio: __(
+		'LM Studio server (OpenAI-compatible).',
+		'ai-provider-for-openai-compatible-servers'
+	),
+};
+
 /**
  * Clean badge component to show connection status.
  */
@@ -655,11 +670,29 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 		  } )
 		: logo;
 
+	// Prefix the connector's registered name with the detected provider, e.g.
+	// "OpenAI Compatible" becomes "vLLM (OpenAI Compatible)".
+	const detectedProviderName = PROVIDER_NAMES[ detectedProvider ];
+	const resolvedName = detectedProviderName
+		? sprintf(
+				/* translators: 1: detected provider name (e.g. vLLM), 2: original connector name */
+				__(
+					'%1$s (%2$s)',
+					'ai-provider-for-openai-compatible-servers'
+				),
+				detectedProviderName,
+				name
+		  )
+		: name;
+	const resolvedDescription = detectedProvider
+		? PROVIDER_DESCRIPTIONS[ detectedProvider ]
+		: description;
+
 	return (
 		<ConnectorItem
 			logo={ resolvedLogo }
-			name={ name }
-			description={ description }
+			name={ resolvedName }
+			description={ resolvedDescription }
 			actionArea={
 				<HStack spacing={ 3 } expanded={ false }>
 					{ isConnected && <ConnectedBadge /> }
