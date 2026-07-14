@@ -13,7 +13,8 @@ const {
 	__experimentalHStack: HStack,
 	__experimentalVStack: VStack,
 } = window.wp.components;
-const { useState, useEffect, createElement, Fragment } = window.wp.element;
+const { useState, useEffect, useRef, createElement, Fragment } =
+	window.wp.element;
 const { __, sprintf } = window.wp.i18n;
 const { useSelect, useDispatch } = window.wp.data;
 
@@ -35,6 +36,8 @@ const supportsImagesSettingName =
 	'connectors_ai_openai_compatible_servers_supports_images';
 const enableR1FormatSettingName =
 	'connectors_ai_openai_compatible_servers_enable_r1_format';
+const detectedProviderSettingName =
+	'connectors_ai_openai_compatible_servers_detected_provider';
 
 // Brand icons for inference servers we can best-effort detect via the test-connection
 // probe (see detect_provider_type() in plugin.php). Resolved relative to this module's
@@ -60,20 +63,13 @@ const PROVIDER_NAMES = {
 	lmstudio: 'LM Studio',
 };
 
-const PROVIDER_DESCRIPTIONS = {
-	ollama: __(
-		'Ollama server (OpenAI-compatible).',
-		'ai-provider-for-openai-compatible-servers'
-	),
-	vllm: __(
-		'vLLM server (OpenAI-compatible).',
-		'ai-provider-for-openai-compatible-servers'
-	),
-	lmstudio: __(
-		'LM Studio server (OpenAI-compatible).',
-		'ai-provider-for-openai-compatible-servers'
-	),
-};
+// One shared description for any detected backend: the title already names
+// the specific server (e.g. "vLLM (OpenAI Compatible)"), so this only needs
+// to say what it does, not restate the brand or "OpenAI-compatible" again.
+const DETECTED_PROVIDER_DESCRIPTION = __(
+	'Text and code generation with your self-hosted models.',
+	'ai-provider-for-openai-compatible-servers'
+);
 
 /**
  * Clean badge component to show connection status.
@@ -137,6 +133,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 		currentHeaders,
 		currentSupportsImages,
 		currentEnableR1Format,
+		currentDetectedProvider,
 	} = useSelect( ( select ) => {
 		const store = select( 'core' );
 		const settings = store.getEntityRecord( 'root', 'site' );
@@ -152,6 +149,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 				currentHeaders: undefined,
 				currentSupportsImages: undefined,
 				currentEnableR1Format: undefined,
+				currentDetectedProvider: undefined,
 			};
 		}
 
@@ -168,6 +166,8 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 				settings[ supportsImagesSettingName ] ?? false,
 			currentEnableR1Format:
 				settings[ enableR1FormatSettingName ] ?? false,
+			currentDetectedProvider:
+				settings[ detectedProviderSettingName ] || null,
 		};
 	}, [] );
 
@@ -201,6 +201,10 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 	const [ detectedProvider, setDetectedProvider ] = useState( null );
 	const [ hasInitialized, setHasInitialized ] = useState( false );
 	const [ hasModelsInitialized, setHasModelsInitialized ] = useState( false );
+	// Set when hydration seeds temp* state from saved settings, so the very next
+	// "connection parameters changed" effect run knows to skip its reset and keep
+	// the preloaded detectedProvider instead of flashing back to the generic icon.
+	const justHydratedRef = useRef( false );
 
 	// Initialize base settings from database once when they load.
 	useEffect( () => {
@@ -216,6 +220,8 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 			setTempDisableThinking( currentDisableThinking );
 			setTempSupportsImages( currentSupportsImages );
 			setTempEnableR1Format( currentEnableR1Format );
+			setDetectedProvider( currentDetectedProvider || null );
+			justHydratedRef.current = true;
 			try {
 				if ( currentHeaders ) {
 					const parsed = JSON.parse( currentHeaders );
@@ -241,6 +247,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 		currentHeaders,
 		currentSupportsImages,
 		currentEnableR1Format,
+		currentDetectedProvider,
 		hasInitialized,
 	] );
 
@@ -324,8 +331,15 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 		};
 	}, [ tempBaseUrl, tempApiKey, tempHeaders ] );
 
-	// Reset test result if connection parameters change.
+	// Reset test result if connection parameters change. Skipped once right after
+	// hydration, since that "change" is just the temp state catching up to the
+	// saved settings (which already seeded detectedProvider) rather than an edit.
 	useEffect( () => {
+		if ( justHydratedRef.current ) {
+			justHydratedRef.current = false;
+			return;
+		}
+
 		setTestResult( null );
 		setDetectedProvider( null );
 	}, [ tempBaseUrl, tempApiKey, tempHeaders ] );
@@ -554,6 +568,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 					[ headersSettingName ]: headersToSave,
 					[ supportsImagesSettingName ]: supportsImagesToSave,
 					[ enableR1FormatSettingName ]: enableR1FormatToSave,
+					[ detectedProviderSettingName ]: detectedProvider || '',
 				},
 				{ throwOnError: true }
 			);
@@ -610,6 +625,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 					[ headersSettingName ]: '[]',
 					[ supportsImagesSettingName ]: false,
 					[ enableR1FormatSettingName ]: false,
+					[ detectedProviderSettingName ]: '',
 				},
 				{ throwOnError: true }
 			);
@@ -685,7 +701,7 @@ function OpenAiCompatibleServersConnector( { name, description, logo } ) {
 		  )
 		: name;
 	const resolvedDescription = detectedProvider
-		? PROVIDER_DESCRIPTIONS[ detectedProvider ]
+		? DETECTED_PROVIDER_DESCRIPTION
 		: description;
 
 	return (

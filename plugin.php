@@ -242,6 +242,28 @@ function register_settings(): void
             'sanitize_callback' => 'rest_sanitize_boolean',
         )
     );
+
+    // Best-effort detected backend (ollama/vllm/lmstudio/''), cached from the last
+    // successful test so the connector card can render the right name/icon on page
+    // load without waiting on a fresh detection round-trip.
+    register_setting(
+        'connectors',
+        'connectors_ai_openai_compatible_servers_detected_provider',
+        array(
+            'type'              => 'string',
+            'label'             => __(
+                'Detected Provider',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'description'       => __(
+                'Best-effort auto-detected backend type, cached from the last successful test.',
+                'ai-provider-for-openai-compatible-servers'
+            ),
+            'default'           => '',
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'sanitize_key',
+        )
+    );
 }
 add_action('init', __NAMESPACE__ . '\\register_settings', 10);
 
