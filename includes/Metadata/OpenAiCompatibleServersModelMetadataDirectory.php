@@ -99,11 +99,44 @@ class OpenAiCompatibleServersModelMetadataDirectory extends AbstractOpenAiCompat
                     if (empty($model_id)) {
                         continue;
                     }
+
+                    /**
+                     * Filters the options supported by a specific OpenAI Compatible model.
+                     *
+                     * @since 1.0.0
+                     *
+                     * @param array  $options  SupportedOption instances array.
+                     * @param string $model_id Model identifier.
+                     * @param string $mode     Either 'manual' or 'autodetect'.
+                     */
+                    $model_options = apply_filters(
+                        'connectors_ai_openai_compatible_servers_model_options',
+                        $options,
+                        $model_id,
+                        'manual'
+                    );
+
+                    /**
+                     * Filters the capabilities supported by a specific OpenAI Compatible model.
+                     *
+                     * @since 1.0.0
+                     *
+                     * @param array  $capabilities CapabilityEnum instances array.
+                     * @param string $model_id     Model identifier.
+                     * @param string $mode         Either 'manual' or 'autodetect'.
+                     */
+                    $model_capabilities = apply_filters(
+                        'connectors_ai_openai_compatible_servers_model_capabilities',
+                        $capabilities,
+                        $model_id,
+                        'manual'
+                    );
+
                     $models[$model_id] = new ModelMetadata(
                         $model_id,
                         $model_id,
-                        $capabilities,
-                        $options
+                        $model_capabilities,
+                        $model_options
                     );
                 }
                 return $models;
@@ -161,11 +194,43 @@ class OpenAiCompatibleServersModelMetadataDirectory extends AbstractOpenAiCompat
             $modelId = $modelData['id'];
             $modelName = $modelData['name'] ?? $modelData['display_name'] ?? $modelId;
 
+            /**
+             * Filters the options supported by a specific OpenAI Compatible model.
+             *
+             * @since 1.0.0
+             *
+             * @param array  $options  SupportedOption instances array.
+             * @param string $modelId  Model identifier.
+             * @param string $mode     Either 'manual' or 'autodetect'.
+             */
+            $model_options = apply_filters(
+                'connectors_ai_openai_compatible_servers_model_options',
+                $options,
+                $modelId,
+                'autodetect'
+            );
+
+            /**
+             * Filters the capabilities supported by a specific OpenAI Compatible model.
+             *
+             * @since 1.0.0
+             *
+             * @param array  $capabilities CapabilityEnum instances array.
+             * @param string $modelId      Model identifier.
+             * @param string $mode         Either 'manual' or 'autodetect'.
+             */
+            $model_capabilities = apply_filters(
+                'connectors_ai_openai_compatible_servers_model_capabilities',
+                $capabilities,
+                $modelId,
+                'autodetect'
+            );
+
             $models[] = new ModelMetadata(
                 $modelId,
                 $modelName,
-                $capabilities,
-                $options
+                $model_capabilities,
+                $model_options
             );
         }
 

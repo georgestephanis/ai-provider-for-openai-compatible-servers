@@ -57,6 +57,22 @@ class OpenAiCompatibleServersTextGenerationModel extends AbstractOpenAiCompatibl
             }
         }
 
+        /**
+         * Filters the HTTP headers for requests to the OpenAI-compatible server.
+         *
+         * @since 1.0.0
+         *
+         * @param array  $headers The HTTP headers array.
+         * @param string $path    The request path (e.g., 'chat/completions').
+         * @param string $method  The HTTP method (e.g. 'POST').
+         */
+        $headers = apply_filters(
+            'connectors_ai_openai_compatible_servers_request_headers',
+            $headers,
+            $path,
+            $method->value
+        );
+
         if ('chat/completions' === $path && is_array($data)) {
             // Context Length configures the model's context window, not the output length,
             // so it must not be sent as `max_tokens` (which caps output tokens and would make
@@ -80,6 +96,16 @@ class OpenAiCompatibleServersTextGenerationModel extends AbstractOpenAiCompatibl
                     'enable_thinking' => false,
                 ];
             }
+
+            /**
+             * Filters the completions request data before it is sent to the inference server.
+             *
+             * @since 1.0.0
+             *
+             * @param array  $data    The request payload data array.
+             * @param string $modelId The model identifier (e.g. qwen3.6-27b).
+             */
+            $data = apply_filters('connectors_ai_openai_compatible_servers_request_data', $data, $this->modelId);
         }
 
         $request_options = $this->getRequestOptions();

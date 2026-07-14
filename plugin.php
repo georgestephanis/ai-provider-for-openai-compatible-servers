@@ -475,7 +475,25 @@ function detect_provider_type(string $base_url, array $headers): ?string
         }
     }
 
-    return null;
+    /**
+     * Filters the detected provider type when parsing the target endpoint origin.
+     *
+     * Enables external plugins to run custom probes or return their own provider identifiers.
+     *
+     * @since 1.0.0
+     *
+     * @param string|null $detected_type The detected provider type, or null if undetected.
+     * @param string      $base_url      The configured base URL of the server.
+     * @param array       $headers       The headers used for probes.
+     * @param array       $probe_args    Arguments passed to wp_remote_get requests.
+     */
+    return apply_filters(
+        'connectors_ai_openai_compatible_servers_detect_provider',
+        null,
+        $base_url,
+        $headers,
+        $probe_args
+    );
 }
 
 /**

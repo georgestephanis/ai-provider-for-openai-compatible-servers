@@ -63,6 +63,21 @@ npm run plugin-zip        # package for distribution
 
 There is no PHPUnit suite yet. Manual testing: point the connector at a local server (e.g. `ollama serve`, then base URL `http://localhost:11434/v1`) and use the "Test Credentials" button; or exercise the model directly through the AI Client.
 
+## Developer Filters (Hooks)
+
+The plugin provides several filters for other plugins to dynamically extend its functionality:
+
+- **`connectors_ai_openai_compatible_servers_request_data`**: Filters the completions request body payload before it is sent to the endpoint.
+  - *Parameters:* `$data` (array), `$modelId` (string).
+- **`connectors_ai_openai_compatible_servers_request_headers`**: Filters HTTP headers for all request pathways.
+  - *Parameters:* `$headers` (array), `$path` (string), `$method` (string).
+- **`connectors_ai_openai_compatible_servers_detect_provider`**: Adds or overrides detection checks when probing server origins.
+  - *Parameters:* `$detected_type` (null|string), `$base_url` (string), `$headers` (array), `$probe_args` (array).
+- **`connectors_ai_openai_compatible_servers_model_options`**: Modifies the `SupportedOption` array for a resolved model.
+  - *Parameters:* `$options` (array), `$modelId` (string), `$mode` (string: `'manual'` or `'autodetect'`).
+- **`connectors_ai_openai_compatible_servers_model_capabilities`**: Modifies the `CapabilityEnum` array for a resolved model.
+  - *Parameters:* `$capabilities` (array), `$modelId` (string), `$mode` (string: `'manual'` or `'autodetect'`).
+
 ## Do not
 
 - Do not commit `scratch/`, `conversation-log.jsonl`, or anything containing real endpoints/API keys — these are local-only and excluded via `.gitignore`/`.distignore`.
