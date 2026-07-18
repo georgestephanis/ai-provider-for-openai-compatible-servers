@@ -1,0 +1,15 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="48" fill="url(#icon_grad)" />
+  <path d="M76 64H180C186.6 64 192 69.4 192 76V180C192 186.6 186.6 192 180 192H76C69.4 192 64 186.6 64 180V76C64 69.4 69.4 64 76 64Z" stroke="white" stroke-width="12" stroke-linejoin="round" />
+  <rect x="96" y="96" width="64" height="64" rx="12" fill="white" />
+  <path d="M128 42V64" stroke="white" stroke-width="12" stroke-linecap="round" />
+  <path d="M128 192V214" stroke="white" stroke-width="12" stroke-linecap="round" />
+  <path d="M42 128H64" stroke="white" stroke-width="12" stroke-linecap="round" />
+  <path d="M192 128H214" stroke="white" stroke-width="12" stroke-linecap="round" />
+  <defs>
+    <linearGradient id="icon_grad" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F46E5" />
+      <stop offset="1" stop-color="#06B6D4" />
+    </linearGradient>
+  </defs>
+</svg>
